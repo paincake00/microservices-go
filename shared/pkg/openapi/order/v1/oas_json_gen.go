@@ -705,6 +705,39 @@ func (s *OptInt) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes PaymentMethodEnum as json.
+func (o OptPaymentMethodEnum) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes PaymentMethodEnum from json.
+func (o *OptPaymentMethodEnum) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPaymentMethodEnum to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPaymentMethodEnum) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPaymentMethodEnum) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes string as json.
 func (o OptString) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -770,12 +803,16 @@ func (s *OrderByUUIDResponse) encodeFields(e *jx.Encoder) {
 		e.Float64(s.TotalPrice)
 	}
 	{
-		e.FieldStart("transaction_uuid")
-		e.Str(s.TransactionUUID)
+		if s.TransactionUUID.Set {
+			e.FieldStart("transaction_uuid")
+			s.TransactionUUID.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("payment_method")
-		s.PaymentMethod.Encode(e)
+		if s.PaymentMethod.Set {
+			e.FieldStart("payment_method")
+			s.PaymentMethod.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("status")
@@ -859,11 +896,9 @@ func (s *OrderByUUIDResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"total_price\"")
 			}
 		case "transaction_uuid":
-			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Str()
-				s.TransactionUUID = string(v)
-				if err != nil {
+				s.TransactionUUID.Reset()
+				if err := s.TransactionUUID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -871,8 +906,8 @@ func (s *OrderByUUIDResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"transaction_uuid\"")
 			}
 		case "payment_method":
-			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
+				s.PaymentMethod.Reset()
 				if err := s.PaymentMethod.Decode(d); err != nil {
 					return err
 				}
@@ -900,7 +935,7 @@ func (s *OrderByUUIDResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01111111,
+		0b01001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

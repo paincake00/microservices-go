@@ -270,6 +270,52 @@ func (o OptInt) Or(d int) int {
 	return d
 }
 
+// NewOptPaymentMethodEnum returns new OptPaymentMethodEnum with value set to v.
+func NewOptPaymentMethodEnum(v PaymentMethodEnum) OptPaymentMethodEnum {
+	return OptPaymentMethodEnum{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPaymentMethodEnum is optional PaymentMethodEnum.
+type OptPaymentMethodEnum struct {
+	Value PaymentMethodEnum
+	Set   bool
+}
+
+// IsSet returns true if OptPaymentMethodEnum was set.
+func (o OptPaymentMethodEnum) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPaymentMethodEnum) Reset() {
+	var v PaymentMethodEnum
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPaymentMethodEnum) SetTo(v PaymentMethodEnum) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPaymentMethodEnum) Get() (v PaymentMethodEnum, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPaymentMethodEnum) Or(d PaymentMethodEnum) PaymentMethodEnum {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -326,9 +372,9 @@ type OrderByUUIDResponse struct {
 	// Стоимость всех деталей в заказе.
 	TotalPrice float64 `json:"total_price"`
 	// UUID детали.
-	TransactionUUID string            `json:"transaction_uuid"`
-	PaymentMethod   PaymentMethodEnum `json:"payment_method"`
-	Status          OrderStatusEnum   `json:"status"`
+	TransactionUUID OptString            `json:"transaction_uuid"`
+	PaymentMethod   OptPaymentMethodEnum `json:"payment_method"`
+	Status          OrderStatusEnum      `json:"status"`
 }
 
 // GetOrderUUID returns the value of OrderUUID.
@@ -352,12 +398,12 @@ func (s *OrderByUUIDResponse) GetTotalPrice() float64 {
 }
 
 // GetTransactionUUID returns the value of TransactionUUID.
-func (s *OrderByUUIDResponse) GetTransactionUUID() string {
+func (s *OrderByUUIDResponse) GetTransactionUUID() OptString {
 	return s.TransactionUUID
 }
 
 // GetPaymentMethod returns the value of PaymentMethod.
-func (s *OrderByUUIDResponse) GetPaymentMethod() PaymentMethodEnum {
+func (s *OrderByUUIDResponse) GetPaymentMethod() OptPaymentMethodEnum {
 	return s.PaymentMethod
 }
 
@@ -387,12 +433,12 @@ func (s *OrderByUUIDResponse) SetTotalPrice(val float64) {
 }
 
 // SetTransactionUUID sets the value of TransactionUUID.
-func (s *OrderByUUIDResponse) SetTransactionUUID(val string) {
+func (s *OrderByUUIDResponse) SetTransactionUUID(val OptString) {
 	s.TransactionUUID = val
 }
 
 // SetPaymentMethod sets the value of PaymentMethod.
-func (s *OrderByUUIDResponse) SetPaymentMethod(val PaymentMethodEnum) {
+func (s *OrderByUUIDResponse) SetPaymentMethod(val OptPaymentMethodEnum) {
 	s.PaymentMethod = val
 }
 
