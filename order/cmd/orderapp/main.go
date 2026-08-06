@@ -15,19 +15,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/paincake00/microservices-go/order/internal/mapper"
 	orderv1 "github.com/paincake00/microservices-go/shared/pkg/openapi/order/v1"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 	paymentv1 "github.com/paincake00/microservices-go/shared/pkg/proto/payment/v1"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
 	grpcInventoryAddress = "localhost:50051"
 	grpcPaymentAddress   = "localhost:50052"
 
-	httpPort          = 8081
+	httpPort          = 8080
 	readHeaderTimeout = 5 * time.Second
 	shutdownTimeout   = 10 * time.Second
 )
