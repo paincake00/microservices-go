@@ -1,0 +1,37 @@
+post:
+  tags:
+    - Order
+  summary: Создание заказа
+  description: Создаёт новый заказ на основе выбранных пользователем деталей.
+  operationId: CreateOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/create_order_request.yaml
+  responses:
+    '200':
+      description: Заказ сформирован и общая сумма деталей посчитана
+      content:
+        application/json:
+          schema:
+            $ref: ../components/create_order_response.yaml
+    '404':
+      description: Не все детали были найдены.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
+    '500':
+      description: Ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: "../components/errors/internal_error.yaml"
+    default:
+      description: Непредвиденная ошибка
+      content:
+        application/json:
+          schema:
+            $ref: "../components/errors/generic_error.yaml"

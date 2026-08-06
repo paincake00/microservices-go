@@ -1,0 +1,7 @@
+{
+  "name": "microservices-go",
+  "private": true,
+  "dependencies": {
+    "@redocly/cli": "^2.44.2"
+  }
+}

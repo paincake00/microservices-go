@@ -1,0 +1,41 @@
+type: object
+required:
+  - order_uuid
+  - user_uuid
+  - part_uuids
+  - total_price
+  - transaction_uuid
+  - payment_method
+  - status
+properties:
+  order_uuid:
+    type: string
+    description: UUID заказа
+    pattern: '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$'
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  user_uuid:
+    type: string
+    description: UUID пользователя
+    pattern: '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$'
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  part_uuids:
+    type: array
+    items:
+      type: string
+      description: UUID детали
+      pattern: '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$'
+      example: "123e4567-e89b-12d3-a456-426614174000"
+  total_price:
+    type: number
+    format: double
+    description: Стоимость всех деталей в заказе
+    example: 123.45
+  transaction_uuid:
+    type: string
+    description: UUID детали
+    pattern: '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$'
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  payment_method:
+    $ref: "./enums/payment_method_enum.yaml"
+  status:
+    $ref: "./enums/order_status_enum.yaml"

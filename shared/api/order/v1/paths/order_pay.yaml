@@ -1,0 +1,40 @@
+parameters:
+  - $ref: ../params/order_uuid.yaml
+
+post:
+  tags:
+    - Order
+  summary: Оплата заказа
+  description: Оплата заказа необходимым платежным методом.
+  operationId: PayOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/pay_order_request.yaml
+  responses:
+    '200':
+      description: Заказ оплачен
+      content:
+        application/json:
+          schema:
+            $ref: "../components/pay_order_response.yaml"
+    '404':
+      description: Не найден заказ.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
+    '500':
+      description: Ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: "../components/errors/internal_error.yaml"
+    default:
+      description: Непредвиденная ошибка
+      content:
+        application/json:
+          schema:
+            $ref: "../components/errors/generic_error.yaml"

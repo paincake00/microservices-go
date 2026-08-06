@@ -1,0 +1,17 @@
+type: object
+required:
+  - user_uuid
+  - path_uuids
+properties:
+  user_uuid:
+    type: string
+    description: UUID пользователя
+    pattern: '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$'
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  part_uuids:
+    type: array
+    items:
+      type: string
+      description: UUID детали
+      pattern: '^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$'
+      example: "123e4567-e89b-12d3-a456-426614174000"
