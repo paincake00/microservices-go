@@ -34,7 +34,6 @@ func (s *RepoSuite) TestListPartsSuccess() {
 	// Testing of filter
 	actualParts, err := s.partRepo.ListParts(filter)
 	s.NoError(err)
-	//s.T().Logf("actualPart: %+v", actualParts[0].Category)
 	s.Len(actualParts, 2)
 	s.ElementsMatch(
 		actualParts, parts[:2],
