@@ -20,3 +20,14 @@ packages:
   github.com/paincake00/microservices-go/payment/internal/repository:
     config:
       include-regex: ".*Repository"
+
+  github.com/paincake00/microservices-go/order/internal/service:
+    config:
+      include-regex: ".*Service"
+  github.com/paincake00/microservices-go/order/internal/repository:
+    config:
+      include-regex: ".*Repository"
+
+  github.com/paincake00/microservices-go/order/internal/client/grpc:
+    config:
+      include-regex: ".*Service"
