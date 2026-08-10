@@ -288,7 +288,7 @@ tasks:
         for mod in {{.MODULES}}; do
           echo "📦 Обрабатываем модуль: $mod"
         
-          TARGET_PKGS=$(go list ./$mod/... \
+          TARGET_PKGS=$(cd "$mod" && go list ./... \
             | grep -E '/(internal/(service|repository))' \
             | grep -vE '/(mocks|testdata|pkg|api|proto|pb|cmd)' \
             | paste -sd "," -)
