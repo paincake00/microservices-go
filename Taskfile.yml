@@ -288,6 +288,11 @@ tasks:
         for mod in {{.MODULES}}; do
           echo "📦 Обрабатываем модуль: $mod"
         
+          if [ ! -f "$mod/go.mod" ]; then
+            echo "⏭️ $mod/go.mod не найден — пропускаем"
+            continue
+          fi
+        
           TARGET_PKGS=$(cd "$mod" && go list ./... \
             | grep -E '/(internal/(service|repository))' \
             | grep -vE '/(mocks|testdata|pkg|api|proto|pb|cmd)' \
