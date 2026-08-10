@@ -25,26 +25,6 @@ jobs:
           go-version: ${{ inputs.go-version }}
           cache: false # отключаем кэш go.sum в корне
 
-      - name: 🔍 Debug Go
-        run: |
-          echo "=== Go ==="
-          go version
-
-          echo "=== GOMOD ==="
-          go env GOMOD
-
-          echo "=== GOWORK ==="
-          go env GOWORK
-
-          echo "=== GOENV ==="
-          go env GOENV
-
-          echo "=== go.work ==="
-          cat go.work
-
-          echo "=== Working directory ==="
-          pwd
-
       - name: 📌 Install Task
         uses: arduino/setup-task@v2.0.0
 
