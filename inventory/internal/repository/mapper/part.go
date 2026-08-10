@@ -9,6 +9,9 @@ import (
 )
 
 func ToModel(p *entity.Part) (*model.Part, error) {
+	if p == nil {
+		return nil, model.ErrNilPart
+	}
 	metadata, err := metadataToBytes(p.Metadata)
 	if err != nil {
 		return nil, err
@@ -40,6 +43,9 @@ func ToModel(p *entity.Part) (*model.Part, error) {
 }
 
 func FromModel(p *model.Part) (*entity.Part, error) {
+	if p == nil {
+		return nil, model.ErrNilPart
+	}
 	metadata, err := metadataFromBytes(p.Metadata)
 	if err != nil {
 		return nil, err

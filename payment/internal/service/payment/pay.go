@@ -2,12 +2,10 @@ package payment
 
 import (
 	"log"
-
-	"github.com/google/uuid"
 )
 
 func (p *Service) PayOrder() (string, error) {
-	id, err := uuid.NewV7()
+	id, err := p.uuidGenerator.NewV7()
 	if err != nil {
 		return "", err
 	}

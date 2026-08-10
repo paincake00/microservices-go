@@ -8,12 +8,12 @@ import (
 	signalGo "os/signal"
 	"syscall"
 
+	partServ "github.com/paincake00/microservices-go/inventory/internal/service/part"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	v1 "github.com/paincake00/microservices-go/inventory/internal/api/inventory/v1"
-	"github.com/paincake00/microservices-go/inventory/internal/repository/part"
-	part2 "github.com/paincake00/microservices-go/inventory/internal/service/part"
+	partRepo "github.com/paincake00/microservices-go/inventory/internal/repository/part"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 )
 
@@ -23,8 +23,8 @@ const (
 )
 
 func main() {
-	partRepo := part.NewRepository()
-	partService := part2.NewService(partRepo)
+	partRepository := partRepo.NewRepository()
+	partService := partServ.NewService(partRepository)
 
 	err := partService.InitParts(defaultPartsNum)
 	if err != nil {

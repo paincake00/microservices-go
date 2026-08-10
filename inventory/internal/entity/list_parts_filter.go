@@ -2,12 +2,14 @@ package entity
 
 import (
 	"slices"
+
+	"github.com/paincake00/microservices-go/inventory/internal/entity/enum"
 )
 
 type ListPartsFilter struct {
 	Uuids                 map[string]struct{}
 	Names                 map[string]struct{}
-	Categories            map[Category]struct{}
+	Categories            map[enum.Category]struct{}
 	ManufacturerCountries map[string]struct{}
 	Tags                  map[string]struct{}
 }
@@ -15,7 +17,7 @@ type ListPartsFilter struct {
 func NewListPartsFilter(
 	uuids []string,
 	names []string,
-	categories []Category,
+	categories []enum.Category,
 	manufacturerCountries []string,
 	tags []string,
 ) ListPartsFilter {

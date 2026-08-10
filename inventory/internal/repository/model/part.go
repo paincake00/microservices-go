@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/paincake00/microservices-go/inventory/internal/entity"
+	"github.com/paincake00/microservices-go/inventory/internal/entity/enum"
 )
 
 type Part struct {
@@ -12,7 +13,7 @@ type Part struct {
 	Description   string
 	Price         float64
 	StockQuantity int64
-	Category      entity.Category
+	Category      enum.Category
 	Dimensions    entity.Dimensions
 	Manufacturer  entity.Manufacturer
 	Tags          []string

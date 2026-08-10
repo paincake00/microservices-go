@@ -1,7 +1,17 @@
 package payment
 
-type Service struct{}
+import "github.com/google/uuid"
 
-func NewService() *Service {
-	return &Service{}
+type UuidGenerator interface {
+	NewV7() (uuid.UUID, error)
+}
+
+type Service struct {
+	uuidGenerator UuidGenerator
+}
+
+func NewService(generator UuidGenerator) *Service {
+	return &Service{
+		uuidGenerator: generator,
+	}
 }

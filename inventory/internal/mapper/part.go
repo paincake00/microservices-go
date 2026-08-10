@@ -4,6 +4,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/paincake00/microservices-go/inventory/internal/entity"
+	"github.com/paincake00/microservices-go/inventory/internal/entity/enum"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 )
 
@@ -33,33 +34,33 @@ func ToProto(p *entity.Part) *inventoryv1.Part {
 	}
 }
 
-func CategoryToProto(category entity.Category) inventoryv1.Category {
+func CategoryToProto(category enum.Category) inventoryv1.Category {
 	switch category {
-	case entity.CATEGORY_ENGINE:
+	case enum.CategoryEngine:
 		return inventoryv1.Category_CATEGORY_ENGINE
-	case entity.CATEGORY_FUEL:
+	case enum.CategoryFuel:
 		return inventoryv1.Category_CATEGORY_FUEL
-	case entity.CATEGORY_PORTHOLE:
+	case enum.CategoryPorthole:
 		return inventoryv1.Category_CATEGORY_PORTHOLE
-	case entity.CATEGORY_WING:
+	case enum.CategoryWing:
 		return inventoryv1.Category_CATEGORY_WING
 	default:
 		return inventoryv1.Category_CATEGORY_UNSPECIFIED
 	}
 }
 
-func CategoryFromProto(category inventoryv1.Category) entity.Category {
+func CategoryFromProto(category inventoryv1.Category) enum.Category {
 	switch category {
 	case inventoryv1.Category_CATEGORY_ENGINE:
-		return entity.CATEGORY_ENGINE
+		return enum.CategoryEngine
 	case inventoryv1.Category_CATEGORY_FUEL:
-		return entity.CATEGORY_FUEL
+		return enum.CategoryFuel
 	case inventoryv1.Category_CATEGORY_PORTHOLE:
-		return entity.CATEGORY_PORTHOLE
+		return enum.CategoryPorthole
 	case inventoryv1.Category_CATEGORY_WING:
-		return entity.CATEGORY_WING
+		return enum.CategoryWing
 	default:
-		return entity.CATEGORY_UNSPECIFIED
+		return enum.CategoryUnspecified
 	}
 }
 

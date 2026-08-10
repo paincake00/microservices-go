@@ -1,0 +1,22 @@
+with-expecter: true
+dir: "{{.InterfaceDir}}/mocks"
+filename: "mock_{{.InterfaceNameSnake}}.go"
+outpkg: "mocks"
+mockname: "{{.InterfaceName}}"
+resolve-type-alias: False
+issue-845-fix: True
+
+packages:
+  github.com/paincake00/microservices-go/inventory/internal/service:
+    config:
+      include-regex: ".*Service"
+  github.com/paincake00/microservices-go/inventory/internal/repository:
+    config:
+      include-regex: ".*Repository"
+
+  github.com/paincake00/microservices-go/payment/internal/service:
+    config:
+      include-regex: ".*Service"
+  github.com/paincake00/microservices-go/payment/internal/repository:
+    config:
+      include-regex: ".*Repository"

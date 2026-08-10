@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/paincake00/microservices-go/inventory/internal/entity/enum"
+)
 
 type Part struct {
 	Uuid          string
@@ -8,7 +12,7 @@ type Part struct {
 	Description   string
 	Price         float64
 	StockQuantity int64
-	Category      Category
+	Category      enum.Category
 	Dimensions    *Dimensions
 	Manufacturer  *Manufacturer
 	Tags          []string

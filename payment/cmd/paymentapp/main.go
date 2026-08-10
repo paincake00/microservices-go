@@ -13,13 +13,15 @@ import (
 
 	v1 "github.com/paincake00/microservices-go/payment/internal/api/payment/v1"
 	"github.com/paincake00/microservices-go/payment/internal/service/payment"
+	"github.com/paincake00/microservices-go/payment/internal/util/uuidutil"
 	paymentv1 "github.com/paincake00/microservices-go/shared/pkg/proto/payment/v1"
 )
 
 const grpcServerPort = 50052
 
 func main() {
-	paymentService := payment.NewService()
+	uuidGenerator := uuidutil.NewUuidGeneratorV7()
+	paymentService := payment.NewService(uuidGenerator)
 	paymentHandler := v1.NewPaymentHandler(paymentService)
 
 	srv := grpc.NewServer()

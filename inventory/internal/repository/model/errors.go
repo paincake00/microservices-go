@@ -7,4 +7,5 @@ var (
 
 	ErrSerializeMetadata   = errors.New("error serializing metadata")
 	ErrUnserializeMetadata = errors.New("error unserializing metadata")
+	ErrNilPart             = errors.New("nil part")
 )

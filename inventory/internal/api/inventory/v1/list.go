@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/paincake00/microservices-go/inventory/internal/entity"
+	"github.com/paincake00/microservices-go/inventory/internal/entity/enum"
 	"github.com/paincake00/microservices-go/inventory/internal/mapper"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 )
@@ -18,7 +19,7 @@ func (i *InventoryHandler) ListParts(
 ) (*inventoryv1.ListPartsResponse, error) {
 	protoFilter := req.GetFilter()
 
-	categories := make([]entity.Category, 0)
+	categories := make([]enum.Category, 0)
 
 	for _, c := range protoFilter.GetCategories() {
 		categories = append(categories, mapper.CategoryFromProto(c))
