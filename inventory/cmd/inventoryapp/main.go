@@ -8,12 +8,12 @@ import (
 	signalGo "os/signal"
 	"syscall"
 
-	partServ "github.com/paincake00/microservices-go/inventory/internal/service/part"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	v1 "github.com/paincake00/microservices-go/inventory/internal/api/inventory/v1"
 	partRepo "github.com/paincake00/microservices-go/inventory/internal/repository/part"
+	partServ "github.com/paincake00/microservices-go/inventory/internal/service/part"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 )
 
