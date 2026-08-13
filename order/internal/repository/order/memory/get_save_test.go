@@ -1,4 +1,4 @@
-package order
+package memory
 
 import (
 	"github.com/brianvoe/gofakeit/v7"

@@ -1,11 +1,11 @@
-package order
+package memory
 
 import (
 	"github.com/paincake00/microservices-go/order/internal/entity"
 	"github.com/paincake00/microservices-go/order/internal/repository/model"
 )
 
-func (o *InMemoryStorage) Get(orderUUID string) (entity.Order, error) {
+func (o *InMemoryOrderStorage) Get(orderUUID string) (entity.Order, error) {
 	o.mx.RLock()
 	defer o.mx.RUnlock()
 

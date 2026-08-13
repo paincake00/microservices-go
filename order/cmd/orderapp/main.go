@@ -12,13 +12,17 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
+	"github.com/paincake00/microservices-go/order/internal/migrator"
+	orderRepo "github.com/paincake00/microservices-go/order/internal/repository/order/memory"
+	"github.com/paincake00/microservices-go/order/pkg/pgclient"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	v1 "github.com/paincake00/microservices-go/order/internal/api/order/v1"
 	"github.com/paincake00/microservices-go/order/internal/client/grpc/inventory"
 	"github.com/paincake00/microservices-go/order/internal/client/grpc/payment"
-	orderRepo "github.com/paincake00/microservices-go/order/internal/repository/order"
 	orderServ "github.com/paincake00/microservices-go/order/internal/service/order"
 	orderv1 "github.com/paincake00/microservices-go/shared/pkg/openapi/order/v1"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
@@ -32,9 +36,44 @@ const (
 	httpPort          = 8080
 	readHeaderTimeout = 5 * time.Second
 	shutdownTimeout   = 10 * time.Second
+
+	maxOpenCons    = 30
+	minIdleCons    = 5
+	maxConIdleTime = 5 * time.Second
+	maxConLifetime = 30 * time.Second
 )
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Printf("failed to load .env file: %v\n", err)
+		return
+	}
+
+	// Создаем пул соединений с Postgresql
+	pg, err := pgclient.New(
+		os.Getenv("DB_URI"),
+		pgclient.MaxOpenCons(maxOpenCons),
+		pgclient.MinIdleCons(minIdleCons),
+		pgclient.MaxConIdleTime(maxConIdleTime),
+		pgclient.MaxConLifetime(maxConLifetime),
+	)
+	if err != nil {
+		log.Printf("failed to connect to database: %v\n", err)
+		return
+	}
+	defer pg.Close()
+
+	// Создаем мигратор для управления миграциями
+	migration := migrator.NewMigrator(stdlib.OpenDBFromPool(pg.Pool), os.Getenv("MIG_DIR"))
+
+	// Применяем миграцию (если уже была, то ничего не будет, Goose умный)
+	err = migration.Up()
+	if err != nil {
+		log.Printf("failed migrations up: %v\n", err)
+		return
+	}
+
 	// Создаем подключения к gRPC-серверам с функциями закрытия
 	connInventory, closeConnInventory := createNewGrpcClient(grpcInventoryAddress)
 	connPayment, closeConnPayment := createNewGrpcClient(grpcPaymentAddress)
@@ -44,13 +83,13 @@ func main() {
 	paymentService := payment.NewService(paymentv1.NewPaymentServiceClient(connPayment))
 
 	// Внедряем зависимости
-	orderStorage := orderRepo.NewInMemoryStorage()
+	orderStorage := orderRepo.NewInMemoryOrderStorage()
 	orderService := orderServ.NewOrderService(orderStorage, inventoryService, paymentService)
 	orderHandler := v1.NewOrderHandler(orderService)
 
 	orderMux, err := orderv1.NewServer(orderHandler)
 	if err != nil {
-		log.Fatalf("ошибка создания сервера OpenAPI: %v", err)
+		log.Fatalf("Error create HTTP-mux from OpenAPI specs: %v", err)
 	}
 
 	// Создаем роутер Chi

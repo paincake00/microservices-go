@@ -13,6 +13,7 @@ vars:
   YQ_VERSION: 'v4.45.2'
   MOCKERY_VERSION: 'v2.53.3'
   GRPCURL_VERSION: 'v1.9.3'
+  MIGRATE_VERSION: 'v4.19.1'
 
   BIN_DIR: '{{.ROOT_DIR}}/bin'
   GOLANGCI_LINT: '{{.BIN_DIR}}/golangci-lint'
@@ -25,6 +26,7 @@ vars:
   PROTOC_GEN_GO_GRPC: '{{.BIN_DIR}}/protoc-gen-go-grpc'
   MOCKERY: "{{.BIN_DIR}}/mockery"
   GRPCURL: '{{.BIN_DIR}}/grpcurl'
+  MIGRATE: '{{.BIN_DIR}}/migrate'
 
   NODE_MODULES_DIR: '{{.ROOT_DIR}}/node_modules/.bin'
   REDOCLY: '{{.NODE_MODULES_DIR}}/redocly'
@@ -372,6 +374,28 @@ tasks:
           fi
         done
         exit $ERR
+
+  migrate:install:
+    desc: "Устанавливаем утилиту golang-migrate"
+    cmds:
+      - |
+        [ -f {{.MIGRATE}} ] || {
+          echo 'Устанавливаем golang-migrate {{.MIGRATE_VERSION}}...'
+          GOBIN={{.BIN_DIR}} go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@{{.MIGRATE_VERSION}}
+        }
+    status:
+      - test -x {{.MIGRATE}}
+
+  migrate:create:
+    desc: "Создание файла миграции. Указать путь до папки миграций 'MIG_PATH=' и название файла миграции 'NAME='"
+    summary: |
+      Создание файла миграции. 
+      Указать путь до папки миграций 'MIG_DIR='.
+      Название файла миграции 'NAME='.
+    deps: [ migrate:install ]
+    cmds:
+      - |
+        migrate create -seq -ext sql -dir {{.MIG_PATH}} {{.NAME}}
 
   grpcurl:install:
     desc: "Устанавливает grpcurl в каталог bin"

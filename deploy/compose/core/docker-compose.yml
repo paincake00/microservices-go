@@ -1,0 +1,14 @@
+services:
+  placeholder:
+    image: alpine
+    command:
+      ["sh", "-c", "echo 'The placeholder service for general network' && sleep infinity"]
+    networks:
+      - microservices-go-net
+
+networks:
+  microservices-go-net:
+    name: microservices-go-net
+    external: false
+    # Эта сеть принадлжеит именно этому compose project (external: false). Он ее может создавать/удалять.
+    # Для дургих это чужая, внешняя сеть (external: true)

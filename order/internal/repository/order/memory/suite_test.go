@@ -1,4 +1,4 @@
-package order
+package memory
 
 import (
 	"testing"
@@ -15,7 +15,7 @@ type RepoSuite struct {
 }
 
 func (s *RepoSuite) SetupSuite() {
-	s.orderRepo = NewInMemoryStorage()
+	s.orderRepo = NewInMemoryOrderStorage()
 }
 
 func (s *RepoSuite) TearDownSuite() {}
