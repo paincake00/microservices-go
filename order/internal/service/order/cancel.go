@@ -8,7 +8,7 @@ import (
 )
 
 func (or *Service) Cancel(ctx context.Context, orderUUID string) error {
-	order, err := or.orderStorage.Get(orderUUID)
+	order, err := or.orderStorage.Get(ctx, orderUUID)
 	if err != nil {
 		return err
 	}
@@ -19,7 +19,7 @@ func (or *Service) Cancel(ctx context.Context, orderUUID string) error {
 
 	if order.Status == enum.PendingPayment {
 		order.Status = enum.Cancelled
-		or.orderStorage.Update(order)
+		or.orderStorage.Update(ctx, order)
 	}
 	return nil
 }

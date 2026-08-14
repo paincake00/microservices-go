@@ -37,7 +37,7 @@ func (s *ServiceSuite) TestCreateAndGetOrderSuccess() {
 	)
 
 	// настройка моков
-	s.orderRepo.On("Save", mock.Anything).Once()
+	s.orderRepo.On("Save", context.Background(), mock.Anything).Once()
 	s.inventoryService.On("ListParts", context.Background(), partUuids).Return(expectedParts, nil).Once()
 
 	orderResp, err := s.orderService.Create(s.ctx, userUuid, partUuids)
@@ -52,7 +52,7 @@ func (s *ServiceSuite) TestCreateAndGetOrderSuccess() {
 		Status:     enum.PendingPayment,
 	}
 
-	s.orderRepo.On("Get", orderResp.OrderUuid).Return(order, nil).Once()
+	s.orderRepo.On("Get", context.Background(), orderResp.OrderUuid).Return(order, nil).Once()
 
 	actualOrder, err := s.orderService.GetByUuid(s.ctx, orderResp.OrderUuid)
 	s.NoError(err)
@@ -83,7 +83,7 @@ func (s *ServiceSuite) TestCreateFailure() {
 	)
 
 	// настройка моков
-	s.orderRepo.On("Save", mock.Anything).Maybe()
+	s.orderRepo.On("Save", context.Background(), mock.Anything).Maybe()
 	s.inventoryService.On("ListParts", context.Background(), partUuids).Return(expectedParts[:2], nil).Once()
 
 	orderResp, err := s.orderService.Create(s.ctx, userUuid, partUuids)

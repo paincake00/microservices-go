@@ -14,16 +14,16 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
-	"github.com/paincake00/microservices-go/order/internal/migrator"
-	orderRepo "github.com/paincake00/microservices-go/order/internal/repository/order/memory"
-	"github.com/paincake00/microservices-go/order/pkg/pgclient"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	v1 "github.com/paincake00/microservices-go/order/internal/api/order/v1"
 	"github.com/paincake00/microservices-go/order/internal/client/grpc/inventory"
 	"github.com/paincake00/microservices-go/order/internal/client/grpc/payment"
+	"github.com/paincake00/microservices-go/order/internal/migrator"
+	orderRepo "github.com/paincake00/microservices-go/order/internal/repository/order/postgres"
 	orderServ "github.com/paincake00/microservices-go/order/internal/service/order"
+	"github.com/paincake00/microservices-go/order/pkg/pgclient"
 	orderv1 "github.com/paincake00/microservices-go/shared/pkg/openapi/order/v1"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 	paymentv1 "github.com/paincake00/microservices-go/shared/pkg/proto/payment/v1"
@@ -83,13 +83,14 @@ func main() {
 	paymentService := payment.NewService(paymentv1.NewPaymentServiceClient(connPayment))
 
 	// Внедряем зависимости
-	orderStorage := orderRepo.NewInMemoryOrderStorage()
+	orderStorage := orderRepo.NewPostgresOrderStorage(pg)
 	orderService := orderServ.NewOrderService(orderStorage, inventoryService, paymentService)
 	orderHandler := v1.NewOrderHandler(orderService)
 
 	orderMux, err := orderv1.NewServer(orderHandler)
 	if err != nil {
-		log.Fatalf("Error create HTTP-mux from OpenAPI specs: %v", err)
+		log.Printf("Error create HTTP-mux from OpenAPI specs: %v", err)
+		return
 	}
 
 	// Создаем роутер Chi

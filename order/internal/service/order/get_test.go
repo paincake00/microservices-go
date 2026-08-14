@@ -1,6 +1,8 @@
 package order
 
 import (
+	"context"
+
 	"github.com/brianvoe/gofakeit/v7"
 
 	"github.com/paincake00/microservices-go/order/internal/entity"
@@ -15,7 +17,7 @@ func (s *ServiceSuite) TestGetByUuidFailure() {
 	)
 
 	// настройка моков
-	s.orderRepo.On("Get", orderUuid).Return(entity.Order{}, errNotFound).Once()
+	s.orderRepo.On("Get", context.Background(), orderUuid).Return(entity.Order{}, errNotFound).Once()
 
 	order, err := s.orderService.GetByUuid(s.ctx, orderUuid)
 	s.Error(err)

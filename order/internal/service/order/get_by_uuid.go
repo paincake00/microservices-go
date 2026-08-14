@@ -10,7 +10,7 @@ func (or *Service) GetByUuid(ctx context.Context, orderUUID string) (
 	entity.Order,
 	error,
 ) {
-	order, err := or.orderStorage.Get(orderUUID)
+	order, err := or.orderStorage.Get(ctx, orderUUID)
 	if err != nil {
 		return entity.Order{}, err
 	}

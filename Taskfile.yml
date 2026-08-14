@@ -397,6 +397,8 @@ tasks:
       - |
         migrate create -seq -ext sql -dir {{.MIG_PATH}} {{.NAME}}
 
+  
+
   grpcurl:install:
     desc: "Устанавливает grpcurl в каталог bin"
     cmds:

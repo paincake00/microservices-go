@@ -13,7 +13,7 @@ func (or *Service) Pay(
 	orderUUID string,
 	payMethod enum.PaymentMethod,
 ) (entity.PaymentTransaction, error) {
-	order, err := or.orderStorage.Get(orderUUID)
+	order, err := or.orderStorage.Get(ctx, orderUUID)
 	if err != nil {
 		return entity.PaymentTransaction{}, err
 	}
@@ -29,9 +29,9 @@ func (or *Service) Pay(
 	order.Status = enum.Paid
 
 	// Обновляем в карте заказ с новыми полями
-	or.orderStorage.Update(order)
+	or.orderStorage.Update(ctx, order)
 
-	log.Printf("Pay order: %+v", order)
+	log.Printf("Pay order: %v", orderUuid)
 
 	return entity.PaymentTransaction{TransactionUuid: *order.TransactionUuid}, nil
 }

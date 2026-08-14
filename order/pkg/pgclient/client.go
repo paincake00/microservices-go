@@ -49,8 +49,19 @@ func New(url string, opts ...Option) (*PostgresClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse postgres url: %w", err)
 	}
-	poolConfig.MaxConns = safeIntToInt32(pg.maxOpenCons)
-	poolConfig.MinIdleConns = safeIntToInt32(pg.minIdleCons)
+
+	maxCons, err := safeIntToInt32(pg.maxOpenCons)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse postgres max open cons: %w", err)
+	}
+	poolConfig.MaxConns = maxCons
+
+	minIdleCons, err := safeIntToInt32(pg.minIdleCons)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse postgres min idle cons: %w", err)
+	}
+	poolConfig.MinIdleConns = minIdleCons
+
 	poolConfig.MaxConnIdleTime = pg.maxConIdleTime
 	poolConfig.MaxConnLifetime = pg.maxConLifetime
 
@@ -77,8 +88,10 @@ func (p *PostgresClient) Close() {
 	}
 }
 
-func safeIntToInt32(v int) int32 {
-	clamped := v & math.MaxInt32
+func safeIntToInt32(v int) (int32, error) {
+	if v < math.MaxInt32 || v > math.MaxInt32 {
+		return 0, fmt.Errorf("value %d overflows int32", v)
+	}
 
-	return int32(clamped)
+	return int32(v), nil
 }

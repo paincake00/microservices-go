@@ -6,7 +6,6 @@ import (
 
 	"github.com/paincake00/microservices-go/order/internal/entity"
 	"github.com/paincake00/microservices-go/order/internal/entity/enum"
-	"github.com/paincake00/microservices-go/order/internal/util/utiluuid"
 )
 
 // Create returns OrderUUID and TotalPrice of all parts.
@@ -23,27 +22,24 @@ func (or *Service) Create(ctx context.Context, userUUID string, partUUIDs []stri
 		return entity.OrderCompleted{}, entity.ErrPartsNotFound
 	}
 
-	orderUuid, err := utiluuid.GetNewUUID()
-	if err != nil {
-		return entity.OrderCompleted{}, err
-	}
-
 	var totalPrice float64
 	for _, part := range parts {
 		totalPrice += part.Price
 	}
 
 	order := entity.Order{
-		OrderUuid:  orderUuid,
 		UserUuid:   userUUID,
 		PartUuids:  partUUIDs,
 		TotalPrice: totalPrice,
 		Status:     enum.PendingPayment,
 	}
 
-	log.Printf("Create order: %+v", order)
+	orderUuid, err := or.orderStorage.Save(ctx, order)
+	if err != nil {
+		return entity.OrderCompleted{}, err
+	}
 
-	or.orderStorage.Save(order)
+	log.Printf("Create order: %v", orderUuid)
 
 	return entity.OrderCompleted{
 		OrderUuid:  orderUuid,

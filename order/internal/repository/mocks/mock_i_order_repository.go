@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	entity "github.com/paincake00/microservices-go/order/internal/entity"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -20,9 +22,9 @@ func (_m *IOrderRepository) EXPECT() *IOrderRepository_Expecter {
 	return &IOrderRepository_Expecter{mock: &_m.Mock}
 }
 
-// Get provides a mock function with given fields: orderUUID
-func (_m *IOrderRepository) Get(orderUUID string) (entity.Order, error) {
-	ret := _m.Called(orderUUID)
+// Get provides a mock function with given fields: ctx, orderUUID
+func (_m *IOrderRepository) Get(ctx context.Context, orderUUID string) (entity.Order, error) {
+	ret := _m.Called(ctx, orderUUID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Get")
@@ -30,17 +32,17 @@ func (_m *IOrderRepository) Get(orderUUID string) (entity.Order, error) {
 
 	var r0 entity.Order
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (entity.Order, error)); ok {
-		return rf(orderUUID)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (entity.Order, error)); ok {
+		return rf(ctx, orderUUID)
 	}
-	if rf, ok := ret.Get(0).(func(string) entity.Order); ok {
-		r0 = rf(orderUUID)
+	if rf, ok := ret.Get(0).(func(context.Context, string) entity.Order); ok {
+		r0 = rf(ctx, orderUUID)
 	} else {
 		r0 = ret.Get(0).(entity.Order)
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(orderUUID)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, orderUUID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -54,14 +56,15 @@ type IOrderRepository_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orderUUID string
-func (_e *IOrderRepository_Expecter) Get(orderUUID interface{}) *IOrderRepository_Get_Call {
-	return &IOrderRepository_Get_Call{Call: _e.mock.On("Get", orderUUID)}
+func (_e *IOrderRepository_Expecter) Get(ctx interface{}, orderUUID interface{}) *IOrderRepository_Get_Call {
+	return &IOrderRepository_Get_Call{Call: _e.mock.On("Get", ctx, orderUUID)}
 }
 
-func (_c *IOrderRepository_Get_Call) Run(run func(orderUUID string)) *IOrderRepository_Get_Call {
+func (_c *IOrderRepository_Get_Call) Run(run func(ctx context.Context, orderUUID string)) *IOrderRepository_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -71,14 +74,37 @@ func (_c *IOrderRepository_Get_Call) Return(_a0 entity.Order, _a1 error) *IOrder
 	return _c
 }
 
-func (_c *IOrderRepository_Get_Call) RunAndReturn(run func(string) (entity.Order, error)) *IOrderRepository_Get_Call {
+func (_c *IOrderRepository_Get_Call) RunAndReturn(run func(context.Context, string) (entity.Order, error)) *IOrderRepository_Get_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// Save provides a mock function with given fields: order
-func (_m *IOrderRepository) Save(order entity.Order) {
-	_m.Called(order)
+// Save provides a mock function with given fields: ctx, order
+func (_m *IOrderRepository) Save(ctx context.Context, order entity.Order) (string, error) {
+	ret := _m.Called(ctx, order)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Save")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Order) (string, error)); ok {
+		return rf(ctx, order)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Order) string); ok {
+		r0 = rf(ctx, order)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, entity.Order) error); ok {
+		r1 = rf(ctx, order)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // IOrderRepository_Save_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Save'
@@ -87,31 +113,45 @@ type IOrderRepository_Save_Call struct {
 }
 
 // Save is a helper method to define mock.On call
+//   - ctx context.Context
 //   - order entity.Order
-func (_e *IOrderRepository_Expecter) Save(order interface{}) *IOrderRepository_Save_Call {
-	return &IOrderRepository_Save_Call{Call: _e.mock.On("Save", order)}
+func (_e *IOrderRepository_Expecter) Save(ctx interface{}, order interface{}) *IOrderRepository_Save_Call {
+	return &IOrderRepository_Save_Call{Call: _e.mock.On("Save", ctx, order)}
 }
 
-func (_c *IOrderRepository_Save_Call) Run(run func(order entity.Order)) *IOrderRepository_Save_Call {
+func (_c *IOrderRepository_Save_Call) Run(run func(ctx context.Context, order entity.Order)) *IOrderRepository_Save_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(entity.Order))
+		run(args[0].(context.Context), args[1].(entity.Order))
 	})
 	return _c
 }
 
-func (_c *IOrderRepository_Save_Call) Return() *IOrderRepository_Save_Call {
-	_c.Call.Return()
+func (_c *IOrderRepository_Save_Call) Return(_a0 string, _a1 error) *IOrderRepository_Save_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *IOrderRepository_Save_Call) RunAndReturn(run func(entity.Order)) *IOrderRepository_Save_Call {
-	_c.Run(run)
+func (_c *IOrderRepository_Save_Call) RunAndReturn(run func(context.Context, entity.Order) (string, error)) *IOrderRepository_Save_Call {
+	_c.Call.Return(run)
 	return _c
 }
 
-// Update provides a mock function with given fields: order
-func (_m *IOrderRepository) Update(order entity.Order) {
-	_m.Called(order)
+// Update provides a mock function with given fields: ctx, order
+func (_m *IOrderRepository) Update(ctx context.Context, order entity.Order) error {
+	ret := _m.Called(ctx, order)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Update")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Order) error); ok {
+		r0 = rf(ctx, order)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // IOrderRepository_Update_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Update'
@@ -120,25 +160,26 @@ type IOrderRepository_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
+//   - ctx context.Context
 //   - order entity.Order
-func (_e *IOrderRepository_Expecter) Update(order interface{}) *IOrderRepository_Update_Call {
-	return &IOrderRepository_Update_Call{Call: _e.mock.On("Update", order)}
+func (_e *IOrderRepository_Expecter) Update(ctx interface{}, order interface{}) *IOrderRepository_Update_Call {
+	return &IOrderRepository_Update_Call{Call: _e.mock.On("Update", ctx, order)}
 }
 
-func (_c *IOrderRepository_Update_Call) Run(run func(order entity.Order)) *IOrderRepository_Update_Call {
+func (_c *IOrderRepository_Update_Call) Run(run func(ctx context.Context, order entity.Order)) *IOrderRepository_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(entity.Order))
+		run(args[0].(context.Context), args[1].(entity.Order))
 	})
 	return _c
 }
 
-func (_c *IOrderRepository_Update_Call) Return() *IOrderRepository_Update_Call {
-	_c.Call.Return()
+func (_c *IOrderRepository_Update_Call) Return(_a0 error) *IOrderRepository_Update_Call {
+	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *IOrderRepository_Update_Call) RunAndReturn(run func(entity.Order)) *IOrderRepository_Update_Call {
-	_c.Run(run)
+func (_c *IOrderRepository_Update_Call) RunAndReturn(run func(context.Context, entity.Order) error) *IOrderRepository_Update_Call {
+	_c.Call.Return(run)
 	return _c
 }
 
