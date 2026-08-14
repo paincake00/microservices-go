@@ -13,7 +13,7 @@ services:
     restart:
       unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U http-service-user -d http-service" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d order-db" ]
       interval: 10s # проверка с периодичностью 10 сек
       timeout: 5s # ожидание не более 5 сек
       retries: 5 # столько доступно неудачных попыток

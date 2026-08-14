@@ -19,12 +19,13 @@ func (o *PostgresOrderStorage) Save(ctx context.Context, order entity.Order) (st
 		return "", fmt.Errorf("%s: error starting transaction: %w", op, err)
 	}
 	defer func() {
+		//nolint:gosec // G104: rollback error intentionally ignored
 		_ = tx.Rollback(ctx)
 	}()
 
 	// Создание заказа
 	builderOrderQuery := o.pgClient.Builder.
-		Insert("order").
+		Insert(`"order"`).
 		Columns("user_uuid", "total_price", "transaction_uuid", "payment_method", "status").
 		Values(
 			order.UserUuid, order.TotalPrice, order.TransactionUuid, order.PaymentMethod, order.Status,
@@ -64,12 +65,13 @@ func (o *PostgresOrderStorage) Update(ctx context.Context, order entity.Order) e
 		return fmt.Errorf("%s: error starting transaction: %w", op, err)
 	}
 	defer func() {
+		//nolint:gosec // G104: rollback error intentionally ignored
 		_ = tx.Rollback(ctx)
 	}()
 
 	// Обновление заказа
 	builderOrderQuery := o.pgClient.Builder.
-		Update("order").
+		Update(`"order"`).
 		Set("user_uuid", order.UserUuid).
 		Set("total_price", order.TotalPrice).
 		Set("transaction_uuid", order.TransactionUuid).

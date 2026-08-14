@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	dbURI         = "postgres://postgres:postgres@localhost/postgres?sslmode=disable"
-	migrationsDir = "migrations"
+	dbURI         = "postgres://postgres:postgres@localhost:5432/order-db?sslmode=disable"
+	migrationsDir = "../../../../migrations"
 
 	maxOpenCons    = 30
 	minIdleCons    = 5

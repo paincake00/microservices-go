@@ -36,8 +36,10 @@ func (s *ServiceSuite) TestCreateAndGetOrderSuccess() {
 		}
 	)
 
+	fakedOrderUUID := gofakeit.UUID()
+
 	// настройка моков
-	s.orderRepo.On("Save", context.Background(), mock.Anything).Once()
+	s.orderRepo.On("Save", context.Background(), mock.Anything).Return(fakedOrderUUID, nil).Once()
 	s.inventoryService.On("ListParts", context.Background(), partUuids).Return(expectedParts, nil).Once()
 
 	orderResp, err := s.orderService.Create(s.ctx, userUuid, partUuids)
@@ -83,7 +85,7 @@ func (s *ServiceSuite) TestCreateFailure() {
 	)
 
 	// настройка моков
-	s.orderRepo.On("Save", context.Background(), mock.Anything).Maybe()
+	s.orderRepo.On("Save", context.Background(), mock.Anything).Return(mock.Anything, nil).Maybe()
 	s.inventoryService.On("ListParts", context.Background(), partUuids).Return(expectedParts[:2], nil).Once()
 
 	orderResp, err := s.orderService.Create(s.ctx, userUuid, partUuids)

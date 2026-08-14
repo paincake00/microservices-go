@@ -14,6 +14,7 @@ vars:
   MOCKERY_VERSION: 'v2.53.3'
   GRPCURL_VERSION: 'v1.9.3'
   MIGRATE_VERSION: 'v4.19.1'
+  GOOSE_VERSION: 'v3.27.3'
 
   BIN_DIR: '{{.ROOT_DIR}}/bin'
   GOLANGCI_LINT: '{{.BIN_DIR}}/golangci-lint'
@@ -27,6 +28,7 @@ vars:
   MOCKERY: "{{.BIN_DIR}}/mockery"
   GRPCURL: '{{.BIN_DIR}}/grpcurl'
   MIGRATE: '{{.BIN_DIR}}/migrate'
+  GOOSE: '{{.BIN_DIR}}/goose'
 
   NODE_MODULES_DIR: '{{.ROOT_DIR}}/node_modules/.bin'
   REDOCLY: '{{.NODE_MODULES_DIR}}/redocly'
@@ -375,6 +377,29 @@ tasks:
         done
         exit $ERR
 
+  goose-cli:install:
+    desc: "Устанавливаем утилиту goose CLI"
+    cmds:
+      - |
+        [ -f {{.GOOSE}} ] || {
+          echo 'Устанавливаем goose CLI {{.GOOSE_VERSION}}...'
+          GOBIN={{.BIN_DIR}} go install github.com/pressly/goose/v3/cmd/goose@{{.GOOSE_VERSION}}
+        }
+    status:
+      - test -x {{.GOOSE}}
+
+  goose-cli:create:
+    desc: "Создание файла миграции. Указать путь до папки миграций 'MIG_PATH=' и название файла миграции 'NAME='"
+    summary: |
+      Создание файла миграции. 
+      Указать путь до папки миграций 'MIG_DIR='.
+      Название файла миграции 'NAME='.
+    deps: [ goose-cli:install ]
+    cmds:
+      - |
+        {{.GOOSE}} -dir {{.MIG_PATH}} create {{.NAME}} sql
+
+  # deprecated
   migrate:install:
     desc: "Устанавливаем утилиту golang-migrate"
     cmds:
@@ -386,6 +411,7 @@ tasks:
     status:
       - test -x {{.MIGRATE}}
 
+  # deprecated
   migrate:create:
     desc: "Создание файла миграции. Указать путь до папки миграций 'MIG_PATH=' и название файла миграции 'NAME='"
     summary: |
@@ -397,7 +423,61 @@ tasks:
       - |
         migrate create -seq -ext sql -dir {{.MIG_PATH}} {{.NAME}}
 
-  
+  up-core:
+    desc: "Создание core контейнеров с общими зависимостями"
+    dir: deploy/compose/core
+    cmds:
+      - echo "[task] 🚀 Поднимаем core контейнеры"
+      - docker compose up --build --detach
+
+  down-core:
+    desc: "Удаление core контейнеров с общими зависимостями"
+    dir: deploy/compose/core
+    cmds:
+      - echo "[task] 🚀 Удаляем core контейнеры"
+      - docker compose down --volumes
+
+  up-inventory:
+    desc: Поднять Inventory сервис и все его зависимости
+    dir: deploy/compose/inventory
+    cmds:
+      - echo "[task] 📦 Поднимаем Inventory с зависимостями"
+      - docker compose up --build --detach
+
+  down-inventory:
+    desc: Остановить и удалить Inventory сервис и все его зависимости
+    dir: deploy/compose/inventory
+    cmds:
+      - echo "[task] 🛑 Останавливаем Inventory с зависимостями"
+      - docker compose down --volumes
+
+  up-order:
+    desc: Поднять Order сервис и все его зависимости
+    dir: deploy/compose/order
+    cmds:
+      - echo "[task] 📦 Поднимаем Order с зависимостями"
+      - docker compose up --build --detach
+
+  down-order:
+    desc: Остановить и удалить Order сервис и все его зависимости
+    dir: deploy/compose/order
+    cmds:
+      - echo "[task] 🛑 Останавливаем Order с зависимостями"
+      - docker compose down --volumes
+
+  up-all:
+    desc: Поднять все сервисы по очереди вместе с зависимостями
+    cmds:
+      - task up-core
+      - task up-inventory
+      - task up-order
+
+  down-all:
+    desc: Остановить и удалить все сервисы по очереди вместе с зависимостями
+    cmds:
+      - task down-core
+      - task down-inventory
+      - task down-order
 
   grpcurl:install:
     desc: "Устанавливает grpcurl в каталог bin"

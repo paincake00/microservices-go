@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"log"
 
 	"github.com/paincake00/microservices-go/order/internal/entity"
 	"github.com/paincake00/microservices-go/order/internal/entity/enum"
@@ -19,7 +20,11 @@ func (or *Service) Cancel(ctx context.Context, orderUUID string) error {
 
 	if order.Status == enum.PendingPayment {
 		order.Status = enum.Cancelled
-		or.orderStorage.Update(ctx, order)
+		err = or.orderStorage.Update(ctx, order)
+		if err != nil {
+			return err
+		}
+		log.Printf("order cancelled with UUID: %s", orderUUID)
 	}
 	return nil
 }

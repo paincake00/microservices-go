@@ -89,7 +89,7 @@ func (p *PostgresClient) Close() {
 }
 
 func safeIntToInt32(v int) (int32, error) {
-	if v < math.MaxInt32 || v > math.MaxInt32 {
+	if v < math.MinInt32 || v > math.MaxInt32 {
 		return 0, fmt.Errorf("value %d overflows int32", v)
 	}
 

@@ -23,6 +23,7 @@ go.work.sum
 
 .idea
 .vscode
+.env
 .cursor/
 bin/
 bundles/

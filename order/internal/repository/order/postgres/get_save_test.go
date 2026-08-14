@@ -1,6 +1,8 @@
 package memory
 
 import (
+	"context"
+
 	"github.com/brianvoe/gofakeit/v7"
 
 	"github.com/paincake00/microservices-go/order/internal/entity"
@@ -9,32 +11,29 @@ import (
 )
 
 func (s *RepoSuite) TestSaveAndGetOrderSuccess() {
-	var (
-		id = gofakeit.UUID()
+	order := entity.Order{
+		UserUuid: gofakeit.UUID(),
+		PartUuids: []string{
+			gofakeit.UUID(),
+			gofakeit.UUID(),
+		},
+		TotalPrice: gofakeit.Float64Range(0, 1000),
+		Status:     enum.PendingPayment,
+	}
 
-		order = entity.Order{
-			OrderUuid: id,
-			UserUuid:  gofakeit.UUID(),
-			PartUuids: []string{
-				gofakeit.UUID(),
-				gofakeit.UUID(),
-			},
-			TotalPrice: gofakeit.Float64Range(0, 1000),
-			Status:     enum.PendingPayment,
-		}
-	)
-
-	s.orderRepo.Save(order)
-
-	get, err := s.orderRepo.Get(id)
+	orderUuid, err := s.orderRepo.Save(context.Background(), order)
 	s.NoError(err)
+
+	get, err := s.orderRepo.Get(context.Background(), orderUuid)
+	s.NoError(err)
+	order.OrderUuid = orderUuid
 	s.Equal(order, get)
 }
 
 func (s *RepoSuite) TestGetOrderFailure() {
 	id := gofakeit.UUID()
 
-	_, err := s.orderRepo.Get(id)
+	_, err := s.orderRepo.Get(context.Background(), id)
 	s.Error(err)
 	s.ErrorIs(err, model.ErrOrderNotFound)
 }
