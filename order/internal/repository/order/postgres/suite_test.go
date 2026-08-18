@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/paincake00/microservices-go/order/internal/migrator"
-	"github.com/paincake00/microservices-go/order/internal/repository"
-	"github.com/paincake00/microservices-go/order/pkg/pgclient"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+
+	"github.com/paincake00/microservices-go/order/internal/migrator"
+	"github.com/paincake00/microservices-go/order/internal/repository"
+	"github.com/paincake00/microservices-go/order/pkg/pgclient"
 )
 
 const (
