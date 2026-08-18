@@ -19,7 +19,7 @@ func (i *InventoryHandler) GetPart(ctx context.Context, req *inventoryv1.GetPart
 ) {
 	id := req.GetUuid()
 
-	p, err := i.partService.GetPart(id)
+	p, err := i.partService.GetPart(ctx, id)
 	if err != nil {
 		if errors.Is(err, model.ErrNotFound) {
 			log.Printf("Part %s not found", id)

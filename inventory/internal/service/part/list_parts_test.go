@@ -1,6 +1,7 @@
 package part
 
 import (
+	"context"
 	"math/rand"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -24,11 +25,13 @@ func (s *ServiceSuite) TestListPartsSuccess() {
 		part0    = createFakedPart(uuids[0], category)
 		part1    = createFakedPart(uuids[1], category)
 		part2    = createFakedPart(uuids[2], category)
+
+		ctx = context.Background()
 	)
 
-	s.partRepo.On("ListParts", filter).Return([]*entity.Part{part0, part1, part2}, nil).Once()
+	s.partRepo.On("ListParts", ctx, filter).Return([]*entity.Part{part0, part1, part2}, nil).Once()
 
-	parts, err := s.partService.ListParts(filter)
+	parts, err := s.partService.ListParts(ctx, filter)
 	s.NoError(err)
 	s.Equal(part0, parts[0])
 }
@@ -38,11 +41,13 @@ func (s *ServiceSuite) TestListPartsFailure() {
 		filter = entity.NewListPartsFilter(nil, nil, nil, nil, nil)
 
 		errOut = gofakeit.Error()
+
+		ctx = context.Background()
 	)
 
-	s.partRepo.On("ListParts", filter).Return(nil, errOut).Once()
+	s.partRepo.On("ListParts", ctx, filter).Return(nil, errOut).Once()
 
-	parts, err := s.partService.ListParts(filter)
+	parts, err := s.partService.ListParts(ctx, filter)
 	s.Error(err)
 	s.ErrorIs(err, errOut)
 	s.Nil(parts)

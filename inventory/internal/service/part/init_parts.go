@@ -1,8 +1,10 @@
 package part
 
 import (
+	"context"
 	"log"
 	"math/rand"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
 
@@ -13,9 +15,17 @@ import (
 
 // InitParts - создание исходных деталей при старте сервиса
 // numParts - число создаваемых в начале деталей
-func (p *Service) InitParts(numParts int) error {
+func (p *Service) InitParts(ctx context.Context, numParts int) error {
+	// Очистка предыдущих записей из коллекции
+	err := p.partRepo.DeleteAll(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Создание фейковых категорий
 	categories, length := allCategories()
 
+	// Создание фейковых деталей
 	for range numParts {
 		id, err := uuidutil.GetNewUUID()
 		if err != nil {
@@ -27,20 +37,19 @@ func (p *Service) InitParts(numParts int) error {
 
 		part := createFakedPart(id, category)
 
-		log.Printf("Add new part with UUID: %s", part.Uuid)
-
-		err = p.partRepo.Create(part)
+		id, err = p.partRepo.Create(ctx, part)
 		if err != nil {
 			return err
 		}
+		log.Printf("Add new part with UUID: %s", id)
 	}
 
 	return nil
 }
 
 func createFakedPart(id string, category enum.Category) *entity.Part {
-	createdAt := gofakeit.Date()
-	updatedAt := gofakeit.DateRange(createdAt, createdAt.AddDate(0, 0, 1))
+	createdAt := gofakeit.Date().Truncate(time.Millisecond)
+	updatedAt := gofakeit.DateRange(createdAt, createdAt.AddDate(0, 0, 1)).Truncate(time.Millisecond)
 
 	part := &entity.Part{
 		Uuid:          id,

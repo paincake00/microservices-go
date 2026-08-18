@@ -1,6 +1,8 @@
-package part
+package mongodb
 
 import (
+	"context"
+
 	"github.com/brianvoe/gofakeit/v7"
 
 	"github.com/paincake00/microservices-go/inventory/internal/entity"
@@ -27,12 +29,12 @@ func (s *RepoSuite) TestListPartsSuccess() {
 
 	// Creating of needed parts
 	for _, pp := range parts {
-		err := s.partRepo.Create(pp)
+		_, err := s.partRepo.Create(context.Background(), pp)
 		s.NoError(err)
 	}
 
 	// Testing of filter
-	actualParts, err := s.partRepo.ListParts(filter)
+	actualParts, err := s.partRepo.ListParts(context.Background(), filter)
 	s.NoError(err)
 	s.Len(actualParts, 2)
 	s.ElementsMatch(

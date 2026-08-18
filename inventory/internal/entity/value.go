@@ -1,6 +1,8 @@
 package entity
 
-import "encoding/json"
+import (
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 type ValueKind int32
 
@@ -66,13 +68,12 @@ func NewBoolValue(value bool) *Value {
 	}
 }
 
-// Методы для Value <-> jsonb для БД
-
-func (v *Value) MarshalJSON() ([]byte, error) {
-	return json.Marshal(
+// MarshalBSON - имплементация интерфейса bson.Marshaler
+func (v *Value) MarshalBSON() ([]byte, error) {
+	return bson.Marshal(
 		struct {
-			Kind ValueKind `json:"kind"`
-			Data any       `json:"data"`
+			Kind ValueKind `bson:"kind"`
+			Data any       `bson:"data"`
 		}{
 			v.kind,
 			v.data,
@@ -80,14 +81,15 @@ func (v *Value) MarshalJSON() ([]byte, error) {
 	)
 }
 
-func (v *Value) UnmarshalJSON(data []byte) error {
+// UnmarshalBSON - имплементация интерфейса bson.Unmarshaler
+func (v *Value) UnmarshalBSON(data []byte) error {
 	var raw struct {
-		Kind ValueKind `json:"kind"`
-		// игнорирует Data при парсинге, кладет сырое значение из JSON
-		Data json.RawMessage `json:"data"`
+		Kind ValueKind `bson:"kind"`
+		// игнорирует Data при парсинге, кладет сырое значение из BSON
+		Data bson.RawValue `bson:"data"`
 	}
 
-	err := json.Unmarshal(data, &raw)
+	err := bson.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
@@ -97,25 +99,25 @@ func (v *Value) UnmarshalJSON(data []byte) error {
 	switch v.GetKind() {
 	case StringValue:
 		var value string
-		if err = json.Unmarshal(raw.Data, &value); err != nil {
+		if err = raw.Data.Unmarshal(&value); err != nil {
 			return err
 		}
 		v.data = value
 	case Int64Value:
 		var value int64
-		if err = json.Unmarshal(raw.Data, &value); err != nil {
+		if err = raw.Data.Unmarshal(&value); err != nil {
 			return err
 		}
 		v.data = value
 	case Float64Value:
 		var value float64
-		if err = json.Unmarshal(raw.Data, &value); err != nil {
+		if err = raw.Data.Unmarshal(&value); err != nil {
 			return err
 		}
 		v.data = value
 	case BoolValue:
 		var value bool
-		if err = json.Unmarshal(raw.Data, &value); err != nil {
+		if err = raw.Data.Unmarshal(&value); err != nil {
 			return err
 		}
 		v.data = value

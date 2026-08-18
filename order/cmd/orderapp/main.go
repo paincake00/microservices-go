@@ -30,17 +30,18 @@ import (
 )
 
 const (
-	grpcInventoryAddress = "localhost:50051"
-	grpcPaymentAddress   = "localhost:50052"
+	grpcInventoryAddress = "127.0.0.1:50051"
+	grpcPaymentAddress   = "127.0.0.1:50052"
 
 	httpPort          = 8080
 	readHeaderTimeout = 5 * time.Second
+	requestTimeout    = 30 * time.Second
 	shutdownTimeout   = 10 * time.Second
 
 	maxOpenCons    = 30
 	minIdleCons    = 5
-	maxConIdleTime = 5 * time.Second
-	maxConLifetime = 30 * time.Second
+	maxConIdleTime = 5 * time.Minute
+	maxConLifetime = 30 * time.Minute
 )
 
 func main() {
@@ -99,7 +100,7 @@ func main() {
 	// Добавляем middlewares
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(10 * time.Second))
+	r.Use(middleware.Timeout(requestTimeout))
 
 	// Монтируем обработчики OpenAPI
 	r.Mount("/", orderMux)
@@ -166,5 +167,6 @@ func createNewGrpcClient(address string) (*grpc.ClientConn, func() error) {
 	if err != nil {
 		log.Fatalf("did not connect to gRPC Server with address %s: %v", address, err)
 	}
+
 	return conn, func() error { return conn.Close() }
 }

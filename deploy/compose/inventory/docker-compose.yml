@@ -1,0 +1,36 @@
+name: microservices-go
+
+services:
+  inventory-mongo:
+    image: mongo:8.0
+    container_name: inventory-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: inventory-db
+    volumes:
+      - mongo_inventory_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "echo 'db.runCommand({ ping: 1 }).ok' | mongosh --quiet -u mongo -p mongo --authenticationDatabase admin",
+        ]
+      # Проверка готовности MongoDB: выполняем команду ping через mongosh с указанием логина и пароля
+      # --quiet отключает лишний вывод, чтобы результатом был только "1" при успехе
+      interval: 10s # Запускаем проверку каждые 10 секунд
+      timeout: 5s # Максимальное время ожидания выполнения ping-команды
+      retries: 5 # После 5 неудачных проверок подряд контейнер считается "неработоспособным"
+    restart:
+      unless-stopped
+    networks:
+      - microservices-go-net
+
+networks:
+  microservices-go-net:
+    external: true
+
+volumes:
+  mongo_inventory_data:

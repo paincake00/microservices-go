@@ -1,3 +1,5 @@
+name: microservices-go
+
 services:
   placeholder:
     image: alpine

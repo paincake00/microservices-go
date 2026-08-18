@@ -1,3 +1,5 @@
+name: microservices-go
+
 services:
   order-postgres:
     image: postgres:17.0-alpine3.20

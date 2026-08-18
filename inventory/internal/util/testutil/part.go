@@ -1,6 +1,8 @@
 package testutil
 
 import (
+	"time"
+
 	"github.com/brianvoe/gofakeit/v7"
 
 	"github.com/paincake00/microservices-go/inventory/internal/entity"
@@ -8,8 +10,8 @@ import (
 )
 
 func NewPart(id string, category enum.Category, metadata map[string]*entity.Value) *entity.Part {
-	createdAt := gofakeit.Date()
-	updatedAt := gofakeit.DateRange(createdAt, createdAt.AddDate(0, 0, 1))
+	createdAt := gofakeit.Date().Truncate(time.Millisecond)
+	updatedAt := gofakeit.DateRange(createdAt, createdAt.AddDate(0, 0, 1)).Truncate(time.Millisecond)
 
 	part := &entity.Part{
 		Uuid:          id,

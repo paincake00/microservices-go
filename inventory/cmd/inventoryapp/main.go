@@ -1,19 +1,23 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	signalGo "os/signal"
 	"syscall"
+	"time"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	v1 "github.com/paincake00/microservices-go/inventory/internal/api/inventory/v1"
-	partRepo "github.com/paincake00/microservices-go/inventory/internal/repository/part"
+	"github.com/paincake00/microservices-go/inventory/internal/repository/part/mongodb"
 	partServ "github.com/paincake00/microservices-go/inventory/internal/service/part"
+	"github.com/paincake00/microservices-go/inventory/pkg/mongoclient"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 )
 
@@ -23,12 +27,41 @@ const (
 )
 
 func main() {
-	partRepository := partRepo.NewRepository()
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Получение URI для подключения к Mongo
+	dbURI := os.Getenv("MONGO_URI")
+	if dbURI == "" {
+		log.Fatal("MONGO_URI environment variable not set")
+	}
+
+	// Создание подключения к mongo
+	mongoClient, err := mongoclient.New(
+		dbURI,
+		mongoclient.ShutdownTimeout(15*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Error connecting to mongodb: %v", err)
+	}
+	defer func() {
+		cerr := mongoClient.Close()
+		if cerr != nil {
+			log.Printf("Error closing mongodb: %v", cerr)
+		}
+	}()
+	// Получение БД
+	mongoDB := mongoClient.Mongodb.Database(os.Getenv("MONGO_INITDB_DATABASE"))
+
+	partRepository := mongodb.NewPartStorage(mongoDB)
 	partService := partServ.NewService(partRepository)
 
-	err := partService.InitParts(defaultPartsNum)
+	err = partService.InitParts(context.Background(), defaultPartsNum)
 	if err != nil {
-		log.Fatalf("Error initializing parts: %s", err)
+		log.Printf("Error initializing parts: %s", err)
+		return
 	}
 
 	inventoryHandler := v1.NewInventoryHandler(partService)

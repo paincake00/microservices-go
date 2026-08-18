@@ -5,10 +5,10 @@ import (
 )
 
 type PostgresOrderStorage struct {
-	pgClient *pgclient.PostgresClient
+	pgClient *pgclient.Client
 }
 
-func NewPostgresOrderStorage(pgClient *pgclient.PostgresClient) *PostgresOrderStorage {
+func NewPostgresOrderStorage(pgClient *pgclient.Client) *PostgresOrderStorage {
 	return &PostgresOrderStorage{
 		pgClient: pgClient,
 	}

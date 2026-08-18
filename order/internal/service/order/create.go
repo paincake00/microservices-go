@@ -18,6 +18,7 @@ func (or *Service) Create(ctx context.Context, userUUID string, partUUIDs []stri
 	if err != nil {
 		return entity.OrderCompleted{}, err
 	}
+
 	if len(parts) < len(partUUIDs) {
 		return entity.OrderCompleted{}, entity.ErrPartsNotFound
 	}

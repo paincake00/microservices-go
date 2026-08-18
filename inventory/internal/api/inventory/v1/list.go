@@ -26,12 +26,15 @@ func (i *InventoryHandler) ListParts(
 	}
 
 	filter := entity.NewListPartsFilter(
-		protoFilter.GetUuids(), protoFilter.GetNames(), categories,
-		protoFilter.GetManufacturerCountries(), protoFilter.GetTags(),
+		protoFilter.GetUuids(),
+		protoFilter.GetNames(),
+		categories,
+		protoFilter.GetManufacturerCountries(),
+		protoFilter.GetTags(),
 	)
 
 	res := make([]*inventoryv1.Part, 0)
-	parts, err := i.partService.ListParts(filter)
+	parts, err := i.partService.ListParts(ctx, filter)
 	if err != nil {
 		log.Printf("Error listing parts: %s", err)
 

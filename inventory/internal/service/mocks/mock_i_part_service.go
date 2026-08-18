@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	entity "github.com/paincake00/microservices-go/inventory/internal/entity"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -20,9 +22,9 @@ func (_m *IPartService) EXPECT() *IPartService_Expecter {
 	return &IPartService_Expecter{mock: &_m.Mock}
 }
 
-// GetPart provides a mock function with given fields: _a0
-func (_m *IPartService) GetPart(_a0 string) (*entity.Part, error) {
-	ret := _m.Called(_a0)
+// GetPart provides a mock function with given fields: ctx, partUUID
+func (_m *IPartService) GetPart(ctx context.Context, partUUID string) (*entity.Part, error) {
+	ret := _m.Called(ctx, partUUID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPart")
@@ -30,19 +32,19 @@ func (_m *IPartService) GetPart(_a0 string) (*entity.Part, error) {
 
 	var r0 *entity.Part
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*entity.Part, error)); ok {
-		return rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*entity.Part, error)); ok {
+		return rf(ctx, partUUID)
 	}
-	if rf, ok := ret.Get(0).(func(string) *entity.Part); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *entity.Part); ok {
+		r0 = rf(ctx, partUUID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.Part)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, partUUID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -56,14 +58,15 @@ type IPartService_GetPart_Call struct {
 }
 
 // GetPart is a helper method to define mock.On call
-//   - _a0 string
-func (_e *IPartService_Expecter) GetPart(_a0 interface{}) *IPartService_GetPart_Call {
-	return &IPartService_GetPart_Call{Call: _e.mock.On("GetPart", _a0)}
+//   - ctx context.Context
+//   - partUUID string
+func (_e *IPartService_Expecter) GetPart(ctx interface{}, partUUID interface{}) *IPartService_GetPart_Call {
+	return &IPartService_GetPart_Call{Call: _e.mock.On("GetPart", ctx, partUUID)}
 }
 
-func (_c *IPartService_GetPart_Call) Run(run func(_a0 string)) *IPartService_GetPart_Call {
+func (_c *IPartService_GetPart_Call) Run(run func(ctx context.Context, partUUID string)) *IPartService_GetPart_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -73,14 +76,14 @@ func (_c *IPartService_GetPart_Call) Return(_a0 *entity.Part, _a1 error) *IPartS
 	return _c
 }
 
-func (_c *IPartService_GetPart_Call) RunAndReturn(run func(string) (*entity.Part, error)) *IPartService_GetPart_Call {
+func (_c *IPartService_GetPart_Call) RunAndReturn(run func(context.Context, string) (*entity.Part, error)) *IPartService_GetPart_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// ListParts provides a mock function with given fields: filter
-func (_m *IPartService) ListParts(filter entity.ListPartsFilter) ([]*entity.Part, error) {
-	ret := _m.Called(filter)
+// ListParts provides a mock function with given fields: ctx, filter
+func (_m *IPartService) ListParts(ctx context.Context, filter entity.ListPartsFilter) ([]*entity.Part, error) {
+	ret := _m.Called(ctx, filter)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListParts")
@@ -88,19 +91,19 @@ func (_m *IPartService) ListParts(filter entity.ListPartsFilter) ([]*entity.Part
 
 	var r0 []*entity.Part
 	var r1 error
-	if rf, ok := ret.Get(0).(func(entity.ListPartsFilter) ([]*entity.Part, error)); ok {
-		return rf(filter)
+	if rf, ok := ret.Get(0).(func(context.Context, entity.ListPartsFilter) ([]*entity.Part, error)); ok {
+		return rf(ctx, filter)
 	}
-	if rf, ok := ret.Get(0).(func(entity.ListPartsFilter) []*entity.Part); ok {
-		r0 = rf(filter)
+	if rf, ok := ret.Get(0).(func(context.Context, entity.ListPartsFilter) []*entity.Part); ok {
+		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*entity.Part)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(entity.ListPartsFilter) error); ok {
-		r1 = rf(filter)
+	if rf, ok := ret.Get(1).(func(context.Context, entity.ListPartsFilter) error); ok {
+		r1 = rf(ctx, filter)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -114,14 +117,15 @@ type IPartService_ListParts_Call struct {
 }
 
 // ListParts is a helper method to define mock.On call
+//   - ctx context.Context
 //   - filter entity.ListPartsFilter
-func (_e *IPartService_Expecter) ListParts(filter interface{}) *IPartService_ListParts_Call {
-	return &IPartService_ListParts_Call{Call: _e.mock.On("ListParts", filter)}
+func (_e *IPartService_Expecter) ListParts(ctx interface{}, filter interface{}) *IPartService_ListParts_Call {
+	return &IPartService_ListParts_Call{Call: _e.mock.On("ListParts", ctx, filter)}
 }
 
-func (_c *IPartService_ListParts_Call) Run(run func(filter entity.ListPartsFilter)) *IPartService_ListParts_Call {
+func (_c *IPartService_ListParts_Call) Run(run func(ctx context.Context, filter entity.ListPartsFilter)) *IPartService_ListParts_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(entity.ListPartsFilter))
+		run(args[0].(context.Context), args[1].(entity.ListPartsFilter))
 	})
 	return _c
 }
@@ -131,7 +135,7 @@ func (_c *IPartService_ListParts_Call) Return(_a0 []*entity.Part, _a1 error) *IP
 	return _c
 }
 
-func (_c *IPartService_ListParts_Call) RunAndReturn(run func(entity.ListPartsFilter) ([]*entity.Part, error)) *IPartService_ListParts_Call {
+func (_c *IPartService_ListParts_Call) RunAndReturn(run func(context.Context, entity.ListPartsFilter) ([]*entity.Part, error)) *IPartService_ListParts_Call {
 	_c.Call.Return(run)
 	return _c
 }

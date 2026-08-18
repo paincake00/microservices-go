@@ -16,12 +16,12 @@ const (
 	// min idle cons (может быть минимум ждущих 5 подключений)
 	defaultMinIdleCons = 5
 	// idle conn lifetime (ждущее живет столько, а потом закрывается)
-	defaultMaxConIdleTime = 5 * time.Second
+	defaultMaxConIdleTime = 5 * time.Minute
 	// conn lifetime (столько живет открытое соединение, а потом закрывается)
-	defaultMaxConLifetime = 30 * time.Second
+	defaultMaxConLifetime = 30 * time.Minute
 )
 
-type PostgresClient struct {
+type Client struct {
 	maxOpenCons    int
 	minIdleCons    int
 	maxConIdleTime time.Duration
@@ -31,8 +31,8 @@ type PostgresClient struct {
 	Builder squirrel.StatementBuilderType
 }
 
-func New(url string, opts ...Option) (*PostgresClient, error) {
-	pg := &PostgresClient{
+func New(url string, opts ...Option) (*Client, error) {
+	pg := &Client{
 		maxOpenCons:    defaultMaxOpenCons,
 		minIdleCons:    defaultMinIdleCons,
 		maxConIdleTime: defaultMaxConIdleTime,
@@ -82,7 +82,7 @@ func New(url string, opts ...Option) (*PostgresClient, error) {
 	return pg, nil
 }
 
-func (p *PostgresClient) Close() {
+func (p *Client) Close() {
 	if p.Pool != nil {
 		p.Pool.Close()
 	}

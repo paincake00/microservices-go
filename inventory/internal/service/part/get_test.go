@@ -1,6 +1,7 @@
 package part
 
 import (
+	"context"
 	"math/rand"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -18,11 +19,13 @@ func (s *ServiceSuite) TestGetPartSuccess() {
 		category = categories[rand.Intn(length)]
 
 		part = createFakedPart(uuid, category)
+
+		ctx = context.Background()
 	)
 
-	s.partRepo.On("GetPart", uuid).Return(part, nil).Once()
+	s.partRepo.On("GetPart", ctx, uuid).Return(part, nil).Once()
 
-	res, err := s.partService.GetPart(uuid)
+	res, err := s.partService.GetPart(ctx, uuid)
 	s.NoError(err)
 	s.Equal(part, res)
 }
@@ -32,11 +35,13 @@ func (s *ServiceSuite) TestGetPartFailure() {
 		uuid = gofakeit.UUID()
 
 		errNotFound = model.ErrNotFound
+
+		ctx = context.Background()
 	)
 
-	s.partRepo.On("GetPart", uuid).Return(nil, errNotFound).Once()
+	s.partRepo.On("GetPart", ctx, uuid).Return(nil, errNotFound).Once()
 
-	res, err := s.partService.GetPart(uuid)
+	res, err := s.partService.GetPart(ctx, uuid)
 	s.Error(err)
 	s.ErrorIs(err, errNotFound)
 	s.Nil(res)
