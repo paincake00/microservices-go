@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
@@ -39,7 +40,16 @@ func (s *RepoSuite) SetupSuite() {
 			"MONGO_INITDB_ROOT_PASSWORD": mongoPass,
 			"MONGO_INITDB_DATABASE":      mongoDatabase,
 		},
-		WaitingFor: wait.ForListeningPort("27017/tcp"),
+		WaitingFor: wait.ForExec(
+			[]string{
+				"mongosh",
+				"--quiet",
+				"-u", mongoUser,
+				"-p", mongoPass,
+				"--authenticationDatabase", "admin",
+				"--eval", "db.runCommand({ ping: 1 }).ok",
+			},
+		).WithStartupTimeout(60 * time.Second),
 	}
 
 	// Создание контейнера с MongoDB

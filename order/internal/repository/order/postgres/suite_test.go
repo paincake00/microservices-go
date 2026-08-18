@@ -52,7 +52,13 @@ func (s *RepoSuite) SetupSuite() {
 			"POSTGRES_USER":     dbUser,
 			"POSTGRES_DB":       dbName,
 		},
-		WaitingFor: wait.ForListeningPort("5432/tcp"),
+		WaitingFor: wait.ForExec(
+			[]string{
+				"pg_isready",
+				"-U", "postgres",
+				"-d", "order-db",
+			},
+		).WithStartupTimeout(60 * time.Second),
 	}
 
 	// Создание контейнера
