@@ -10,30 +10,30 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	v1 "github.com/paincake00/microservices-go/inventory/internal/api/inventory/v1"
+	"github.com/paincake00/microservices-go/inventory/internal/config"
 	"github.com/paincake00/microservices-go/inventory/internal/repository/part/mongodb"
 	partServ "github.com/paincake00/microservices-go/inventory/internal/service/part"
 	"github.com/paincake00/microservices-go/inventory/pkg/mongoclient"
+	"github.com/paincake00/microservices-go/platform/pkg/grpc/health"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 )
 
 const (
-	grpcServerPort  = 50051
 	defaultPartsNum = 5
 )
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	cfg, errCfg := config.Load()
+	if errCfg != nil {
+		log.Fatal("Error loading environment from config: ", errCfg)
 	}
 
 	// Получение URI для подключения к Mongo
-	dbURI := os.Getenv("MONGO_URI")
+	dbURI := cfg.Mongo.URI()
 	if dbURI == "" {
 		log.Fatal("MONGO_URI environment variable not set")
 	}
@@ -53,7 +53,7 @@ func main() {
 		}
 	}()
 	// Получение БД
-	mongoDB := mongoClient.Mongodb.Database(os.Getenv("MONGO_INITDB_DATABASE"))
+	mongoDB := mongoClient.Mongodb.Database(cfg.Mongo.DatabaseName())
 
 	partRepository := mongodb.NewPartStorage(mongoDB)
 	partService := partServ.NewService(partRepository)
@@ -72,11 +72,14 @@ func main() {
 
 	reflection.Register(srv)
 
+	// Регистрация эндпоинтов для healthcheck
+	health.RegisterServer(srv)
+
 	// Канал для уведомления об ошибках
 	notify := make(chan error, 1)
 
 	go func() {
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcServerPort))
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.Grpc.Port()))
 		if err != nil {
 			log.Printf("failed to listen: %v", err)
 
@@ -85,7 +88,7 @@ func main() {
 			return
 		}
 
-		log.Printf("starting gRPC server on port %d", grpcServerPort)
+		log.Printf("starting gRPC server on port %s", cfg.Grpc.Port())
 
 		if err = srv.Serve(lis); err != nil {
 			log.Printf("failed to serve: %v", err)

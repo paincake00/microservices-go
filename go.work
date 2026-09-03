@@ -5,4 +5,5 @@ use (
 	./payment
 	./order
 	./shared
+	platform
 )

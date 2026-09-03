@@ -2,21 +2,23 @@ name: microservices-go
 
 services:
   inventory-mongo:
-    image: mongo:8.0
+    image: ${MONGO_IMAGE}
     container_name: inventory-mongo
+    env_file:
+      - .env
     environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: mongo
-      MONGO_INITDB_DATABASE: inventory-db
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
       - mongo_inventory_data:/data/db
     ports:
-      - "27017:27017"
+      - "${MONGO_PORT}:27017"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "echo 'db.runCommand({ ping: 1 }).ok' | mongosh --quiet -u mongo -p mongo --authenticationDatabase admin",
+          "echo 'db.runCommand({ ping: 1 }).ok' | mongosh --quiet -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase ${MONGO_AUTH_DB}",
         ]
       # Проверка готовности MongoDB: выполняем команду ping через mongosh с указанием логина и пароля
       # --quiet отключает лишний вывод, чтобы результатом был только "1" при успехе

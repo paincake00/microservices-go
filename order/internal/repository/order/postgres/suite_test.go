@@ -12,9 +12,9 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	"github.com/paincake00/microservices-go/order/internal/migrator"
 	"github.com/paincake00/microservices-go/order/internal/repository"
 	"github.com/paincake00/microservices-go/order/pkg/pgclient"
+	"github.com/paincake00/microservices-go/platform/pkg/migrator"
 )
 
 const (

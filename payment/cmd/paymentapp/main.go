@@ -12,14 +12,19 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	v1 "github.com/paincake00/microservices-go/payment/internal/api/payment/v1"
+	"github.com/paincake00/microservices-go/payment/internal/config"
 	"github.com/paincake00/microservices-go/payment/internal/service/payment"
 	"github.com/paincake00/microservices-go/payment/internal/util/uuidutil"
+	"github.com/paincake00/microservices-go/platform/pkg/grpc/health"
 	paymentv1 "github.com/paincake00/microservices-go/shared/pkg/proto/payment/v1"
 )
 
-const grpcServerPort = 50052
-
 func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
 	uuidGenerator := uuidutil.NewUuidGeneratorV7()
 	paymentService := payment.NewService(uuidGenerator)
 	paymentHandler := v1.NewPaymentHandler(paymentService)
@@ -30,10 +35,13 @@ func main() {
 
 	reflection.Register(srv)
 
+	// Регистрация эндпоинтов для healthcheck
+	health.RegisterServer(srv)
+
 	notify := make(chan error, 1)
 
 	go func() {
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcServerPort))
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.Grpc.Port()))
 		if err != nil {
 			log.Printf("Failed to listen: %v", err)
 
@@ -43,7 +51,7 @@ func main() {
 			return
 		}
 
-		log.Printf("Starting gRPC server on port %d", grpcServerPort)
+		log.Printf("Starting gRPC server on port %s", cfg.Grpc.Port())
 
 		if err = srv.Serve(lis); err != nil {
 			log.Printf("Failed to serve: %v", err)
@@ -65,7 +73,7 @@ func main() {
 		}
 	}
 
-	log.Printf("Shutting down gRPC server on port %d", grpcServerPort)
+	log.Printf("Shutting down gRPC server on port %s", cfg.Grpc.Port())
 
 	srv.GracefulStop()
 }
