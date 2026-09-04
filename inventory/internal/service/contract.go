@@ -9,4 +9,5 @@ import (
 type IPartService interface {
 	GetPart(ctx context.Context, partUUID string) (*entity.Part, error)
 	ListParts(ctx context.Context, filter entity.ListPartsFilter) ([]*entity.Part, error)
+	InitParts(ctx context.Context, numParts int) error
 }
