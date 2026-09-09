@@ -77,9 +77,9 @@ func New(uri string, opts ...Option) (*Client, error) {
 	return mc, nil
 }
 
-func (m *Client) Close() error {
+func (m *Client) Close(parentCtx context.Context) error {
 	if m.Mongodb != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), m.shutdownTimeout)
+		ctx, cancel := context.WithTimeout(parentCtx, m.shutdownTimeout)
 		defer cancel()
 
 		return m.Mongodb.Disconnect(ctx)

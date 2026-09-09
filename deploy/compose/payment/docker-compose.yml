@@ -1,0 +1,27 @@
+name: microservices-go
+
+services:
+  payment:
+    build:
+      context: ../../..
+      dockerfile: deploy/docker/payment/Dockerfile
+    env_file:
+      - .env
+    environment:
+      CONFIG_PATH: /app/config/.env
+    volumes:
+      - ./.env:/app/config/.env:ro
+    ports:
+      - "127.0.0.1:${GRPC_PORT}:${GRPC_PORT}"
+    healthcheck:
+      test: [ "CMD", "grpc-health-probe", "-addr=:${GRPC_PORT}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-go-net
+
+networks:
+  microservices-go-net:
+    external: true

@@ -1,12 +1,14 @@
 package grpcclient
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/paincake00/microservices-go/platform/pkg/grpc/health"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/paincake00/microservices-go/platform/pkg/grpc/health"
 )
 
 func New(address string, healthCheckTimeout time.Duration) (*grpc.ClientConn, error) {
@@ -15,11 +17,10 @@ func New(address string, healthCheckTimeout time.Duration) (*grpc.ClientConn, er
 		return nil, fmt.Errorf("did not connect to gRPC Server with address %s: %w", address, err)
 	}
 
-	// Проверка gRPC сервера на работоспособность
-	err = health.Check(conn, healthCheckTimeout)
-	if err != nil {
-		_ = conn.Close()
-		return nil, fmt.Errorf("failed health check: %w", err)
+	// Проверка gRPC сервера на работоспособность (Health check)
+	if errHc := health.Check(conn, healthCheckTimeout); errHc != nil {
+		errCls := conn.Close() // закрытия подключения при ошибке (истек таймаут)
+		return nil, fmt.Errorf("failed health check: %w", errors.Join(errHc, errCls))
 	}
 
 	return conn, nil

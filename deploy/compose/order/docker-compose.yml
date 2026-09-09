@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "127.0.0.1:${EXTERNAL_POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - order-pgdata:/var/lib/postgresql/data
     restart:
@@ -21,6 +21,27 @@ services:
       interval: 10s # проверка с периодичностью 10 сек
       timeout: 5s # ожидание не более 5 сек
       retries: 5 # столько доступно неудачных попыток
+    networks:
+      - microservices-go-net
+
+  order:
+    build:
+      context: ../../..
+      dockerfile: deploy/docker/order/Dockerfile
+    env_file:
+      - .env
+    environment:
+      CONFIG_PATH: /app/config/.env
+    volumes:
+      - ./.env:/app/config/.env:ro
+    ports:
+      - "127.0.0.1:${HTTP_SERVER_PORT}:${HTTP_SERVER_PORT}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${HTTP_SERVER_PORT}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - microservices-go-net
 

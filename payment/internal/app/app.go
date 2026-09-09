@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/paincake00/microservices-go/payment/internal/api/grpc"
 	"github.com/paincake00/microservices-go/payment/internal/config"
 	"github.com/paincake00/microservices-go/payment/internal/service"
@@ -16,7 +18,6 @@ import (
 	"github.com/paincake00/microservices-go/payment/pkg/grpcserver"
 	"github.com/paincake00/microservices-go/platform/pkg/closer"
 	"github.com/paincake00/microservices-go/platform/pkg/logger"
-	"go.uber.org/zap"
 )
 
 type useCases struct {

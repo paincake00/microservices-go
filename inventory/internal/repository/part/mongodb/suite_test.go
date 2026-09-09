@@ -1,29 +1,35 @@
+//go:build integration
+
 package mongodb
 
 import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/suite"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
 
 	"github.com/paincake00/microservices-go/inventory/internal/repository"
 	"github.com/paincake00/microservices-go/inventory/pkg/mongoclient"
+	"github.com/paincake00/microservices-go/platform/pkg/logger"
+	"github.com/paincake00/microservices-go/platform/pkg/testcontainers/mongo"
+	"github.com/stretchr/testify/suite"
 )
 
 const (
-	mongoUser     = "user"
-	mongoPass     = "password"
-	mongoDatabase = "inventory-db"
+	loggerLevel  = "debug"
+	loggerAsJSON = true
+
+	mongoContainer = "test-mongo"
+	mongoImage     = "mongo:8.0"
+	mongoUser      = "user"
+	mongoPass      = "password"
+	mongoDatabase  = "inventory-db"
+	mongoAuthDB    = "admin"
 )
 
 type RepoSuite struct {
 	suite.Suite
 
-	container testcontainers.Container
+	container *mongo.Container
 
 	partRepo repository.IPartRepository
 }
@@ -31,51 +37,29 @@ type RepoSuite struct {
 func (s *RepoSuite) SetupSuite() {
 	ctx := context.Background()
 
-	// Запрос на выкачивание образа Mongo
-	req := testcontainers.ContainerRequest{
-		Image:        "mongo:8.0",
-		ExposedPorts: []string{"27017/tcp"},
-		Env: map[string]string{
-			"MONGO_INITDB_ROOT_USERNAME": mongoUser,
-			"MONGO_INITDB_ROOT_PASSWORD": mongoPass,
-			"MONGO_INITDB_DATABASE":      mongoDatabase,
-		},
-		WaitingFor: wait.ForExec(
-			[]string{
-				"mongosh",
-				"--quiet",
-				"-u", mongoUser,
-				"-p", mongoPass,
-				"--authenticationDatabase", "admin",
-				"--eval", "db.runCommand({ ping: 1 }).ok",
-			},
-		).WithStartupTimeout(60 * time.Second),
-	}
+	// Инициализаия логгера
+	logger.Init(loggerLevel, loggerAsJSON)
 
-	// Создание контейнера с MongoDB
-	container, err := testcontainers.GenericContainer(
-		ctx, testcontainers.GenericContainerRequest{
-			ContainerRequest: req,
-			Started:          true,
-		},
+	// Создание Mongo
+	container, err := mongo.NewContainer(
+		ctx,
+		mongo.WithNetworkName(""), // сеть не нужна
+		mongo.WithContainerName(mongoContainer),
+		mongo.WithImageName(mongoImage),
+		mongo.WithDatabase(mongoDatabase),
+		mongo.WithUsername(mongoUser),
+		mongo.WithPassword(mongoPass),
+		mongo.WithAuthDB(mongoAuthDB),
+		mongo.WithLogger(logger.Logger()),
 	)
-	s.Require().NoError(err)
 
 	s.container = container
-
-	// Получение хоста
-	host, err := container.Host(ctx)
-	s.Require().NoError(err)
-
-	// Получение порта
-	port, err := container.MappedPort(ctx, "27017")
-	s.Require().NoError(err)
 
 	// Создание подключения к mongo через клиента
 	mongoClient, err := mongoclient.New(
 		fmt.Sprintf(
-			"mongodb://%s:%s@%s:%s/%s?authSource=admin",
-			mongoUser, mongoPass, host, port.Port(), mongoDatabase,
+			"mongodb://%s:%s@%s:%s/%s?authSource=%s",
+			mongoUser, mongoPass, s.container.Host(), s.container.Port(), mongoDatabase, mongoAuthDB,
 		),
 	)
 	s.Require().NoError(err)
@@ -87,8 +71,10 @@ func (s *RepoSuite) SetupSuite() {
 }
 
 func (s *RepoSuite) TearDownSuite() {
+
 	err := s.container.Terminate(context.Background())
 	s.Require().NoError(err)
+	logger.Info(context.Background(), "🛑 Контейнер MongoDB остановлен")
 }
 
 func TestPartRepoIntegration(t *testing.T) {

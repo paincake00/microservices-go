@@ -13,7 +13,8 @@ const (
 )
 
 type Config struct {
-	Grpc GrpcConfig
+	Grpc   GrpcConfig
+	Logger LoggerConfig
 }
 
 func Load() (*Config, error) {
@@ -33,8 +34,14 @@ func LoadFromPath(path ...string) (*Config, error) {
 		return nil, err
 	}
 
+	loggerCfg, err := env.NewLoggerConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
-		Grpc: grpcCfg,
+		Grpc:   grpcCfg,
+		Logger: loggerCfg,
 	}, nil
 }
 

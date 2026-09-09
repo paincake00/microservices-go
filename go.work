@@ -1,9 +1,9 @@
 go 1.26.4
 
 use (
+	./platform
 	./inventory
 	./payment
 	./order
 	./shared
-	platform
 )

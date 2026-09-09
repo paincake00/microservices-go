@@ -17,6 +17,7 @@ type Config struct {
 	Http      HttpConfig
 	Postgres  PostgresConfig
 	Migration MigrationConfig
+	Logger    LoggerConfig
 }
 
 func Load() (*Config, error) {
@@ -52,11 +53,17 @@ func LoadFromPath(path ...string) (*Config, error) {
 		return nil, err
 	}
 
+	loggerCfg, err := env.NewLoggerConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		Grpc:      grpcCfg,
 		Http:      httpCfg,
 		Postgres:  postgresCfg,
 		Migration: migrationCfg,
+		Logger:    loggerCfg,
 	}, nil
 }
 

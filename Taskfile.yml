@@ -42,6 +42,8 @@ vars:
   OPEN_API_FILES: '{{.ROOT_DIR}}/shared/api/bundles'
   COVERAGE_DIR: '{{.ROOT_DIR}}/coverage'
   COVERAGE_FILE: total.out
+#  ORDER_MIGRATIONS_DIR: './order/migrations'
+#  POSTGRES_DSN: 'postgres://order-service-user:order-service-password@localhost:5432/order-service?sslmode=disable'
 
   MODULES: assembly inventory order payment platform iam notification
   SERVICES: core,assembly,inventory,order,payment,iam,notification
@@ -362,21 +364,39 @@ tasks:
           echo "📂 Отчёт сохранён в $OUTPUT (открой вручную)"
         fi
 
+#  test:
+#    desc: "Запускает юнит-тесты для всех модулей"
+#    summary: |
+#      Запускает юнит-тесты для указанных модулей проекта.
+#      Можно указать конкретные модули через переменную MODULES.
+#    cmds:
+#      - |
+#        ERR=0
+#        for mod in {{.MODULES}}; do
+#          if [ -d "$mod" ]; then
+#            echo "🧪 Тестируем модуль $mod"
+#            (
+#              cd "$mod"
+#              go test -v ./...
+#            ) || ERR=1
+#          fi
+#        done
+#        exit $ERR
+
   test:
     desc: "Запускает юнит-тесты для всех модулей"
     summary: |
       Запускает юнит-тесты для указанных модулей проекта.
       Можно указать конкретные модули через переменную MODULES.
+      Исключаются интеграционные тесты в директориях integration и tests/integration.
+      Также исключаются тесты с тегом "integration".
     cmds:
       - |
         ERR=0
         for mod in {{.MODULES}}; do
           if [ -d "$mod" ]; then
-            echo "🧪 Тестируем модуль $mod"
-            (
-              cd "$mod"
-              go test -v ./... 
-            ) || ERR=1
+            echo "🧪 Тестируем модуль $mod (только юнит-тесты)"
+            go test -v -tags="!integration" $(go list ./$mod/... | grep -v -E '(/integration|/tests/integration|/integrationtests)') || ERR=1
           fi
         done
         exit $ERR
@@ -469,12 +489,27 @@ tasks:
       - echo "[task] 🛑 Останавливаем Order с зависимостями"
       - docker compose down --volumes
 
+  up-payment:
+    desc: Поднять Payment сервис и все его зависимости
+    dir: deploy/compose/payment
+    cmds:
+      - echo "[task] 📦 Поднимаем Payment с зависимостями"
+      - docker compose up --build --detach
+
+  down-payment:
+    desc: Остановить и удалить Payment сервис и все его зависимости
+    dir: deploy/compose/payment
+    cmds:
+      - echo "[task] 🛑 Останавливаем Payment с зависимостями"
+      - docker compose down --volumes
+
   up-all:
     desc: Поднять все сервисы по очереди вместе с зависимостями
     cmds:
       - task up-core
       - task up-inventory
       - task up-order
+      - task up-payment
 
   down-all:
     desc: Остановить и удалить все сервисы по очереди вместе с зависимостями
@@ -482,6 +517,35 @@ tasks:
       - task down-core
       - task down-inventory
       - task down-order
+      - task down-payment
+
+  health-inventory:
+    desc: Проверить состояние контейнеров Inventory Service
+    dir: deploy/compose/inventory
+    cmds:
+      - echo "Inventory service:"
+      - docker compose ps inventory inventory-mongo
+
+  health-payment:
+    desc: Проверить состояние контейнеров Payment Service
+    dir: deploy/compose/payment
+    cmds:
+      - echo "Payment service:"
+      - docker compose ps payment
+
+  health-order:
+    desc: Проверить состояние контейнеров Order Service
+    dir: deploy/compose/order
+    cmds:
+      - echo "Order service"
+      - docker compose ps order order-postgres
+
+  health-all:
+    desc: Проверить состояние контейнеров всех сервисов
+    cmds:
+      - task health-inventory
+      - task health-payment
+      - task health-order
 
   grpcurl:install:
     desc: "Устанавливает grpcurl в каталог bin"
@@ -721,3 +785,30 @@ tasks:
         # Передаем список сервисов в виде строки с разделителями-запятыми
         export SERVICES="{{.SERVICES}}"
         ENV_SUBST={{.ENVSUBST}} "$SCRIPT"
+
+  test-integration:
+    desc: "Запускает интеграционные тесты для указанных модулей"
+    summary: |
+      Запускает интеграционные тесты для модулей, указанных через переменную MODULES.
+      Использует тег "integration" для идентификации интеграционных тестов.
+    cmds:
+      - |
+        ERR=0
+        echo "🚀 Запуск интеграционных тестов (по тегу integration) для модулей: {{.MODULES}}"
+        for mod in {{.MODULES}}; do
+          if [ -d "$mod" ]; then
+            echo "🧪 Проверка модуля $mod на наличие интеграционных тестов"
+
+            # Проверяем наличие файлов с тегом integration
+            HAS_TESTS=$(grep -r "//go:build integration" $mod --include="*.go" | wc -l)
+
+            if [ "$HAS_TESTS" -eq 0 ]; then
+              echo "⚠️ Модуль $mod не содержит интеграционных тестов (с тегом integration), пропускаем"
+              continue
+            fi
+
+            echo "▶️ Запуск интеграционных тестов для $mod"
+            go test -v -tags=integration ./$mod/... || ERR=1
+          fi
+        done
+        exit $ERR

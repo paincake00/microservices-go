@@ -10,6 +10,9 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+
 	"github.com/paincake00/microservices-go/order/internal/api/restapi"
 	clientgrpc "github.com/paincake00/microservices-go/order/internal/client/grpc"
 	"github.com/paincake00/microservices-go/order/internal/client/grpc/inventory"
@@ -27,8 +30,6 @@ import (
 	"github.com/paincake00/microservices-go/platform/pkg/migrator"
 	inventoryv1 "github.com/paincake00/microservices-go/shared/pkg/proto/inventory/v1"
 	paymentv1 "github.com/paincake00/microservices-go/shared/pkg/proto/payment/v1"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 type useCases struct {

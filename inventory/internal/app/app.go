@@ -8,6 +8,9 @@ import (
 	"syscall"
 	"time"
 
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.uber.org/zap"
+
 	"github.com/paincake00/microservices-go/inventory/internal/api/grpc"
 	"github.com/paincake00/microservices-go/inventory/internal/config"
 	"github.com/paincake00/microservices-go/inventory/internal/repository"
@@ -18,8 +21,6 @@ import (
 	"github.com/paincake00/microservices-go/inventory/pkg/mongoclient"
 	"github.com/paincake00/microservices-go/platform/pkg/closer"
 	"github.com/paincake00/microservices-go/platform/pkg/logger"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.uber.org/zap"
 )
 
 type useCases struct {
@@ -50,7 +51,7 @@ func Run(cfg *config.Config) {
 	}
 	cls.AddNamed(
 		"Mongo Client", func(ctx context.Context) error {
-			return mongoClient.Close()
+			return mongoClient.Close(ctx)
 		},
 	)
 	// Получение БД

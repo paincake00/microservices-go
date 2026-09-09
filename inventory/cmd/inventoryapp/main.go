@@ -1,100 +1,26 @@
 package main
 
 import (
-	"context"
+	"log"
 
 	"github.com/paincake00/microservices-go/inventory/internal/app"
 	"github.com/paincake00/microservices-go/inventory/internal/config"
 	"github.com/paincake00/microservices-go/platform/pkg/logger"
-	"go.uber.org/zap"
 )
 
 func main() {
 	cfg, errCfg := config.Load()
 	if errCfg != nil {
-		logger.Fatal(context.Background(), "Error loading environment from config", zap.Error(errCfg))
+		log.Fatalf("Error loading environment from config: %v", errCfg)
 	}
 
-	app.Run(cfg)
+	logger.Init(cfg.Logger.Level(), cfg.Logger.AsJson())
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Fatalf("Error syncing logger: %v", err)
+		}
+	}()
 
-	//// Получение URI для подключения к Mongo
-	//dbURI := cfg.Mongo.URI()
-	//if dbURI == "" {
-	//	log.Fatal("MONGO_URI environment variable not set")
-	//}
-	//
-	//// Создание подключения к mongo
-	//mongoClient, err := mongoclient.New(
-	//	dbURI,
-	//	mongoclient.ShutdownTimeout(15*time.Second),
-	//)
-	//if err != nil {
-	//	log.Fatalf("Error connecting to mongodb: %v", err)
-	//}
-	//defer func() {
-	//	cerr := mongoClient.Close()
-	//	if cerr != nil {
-	//		log.Printf("Error closing mongodb: %v", cerr)
-	//	}
-	//}()
-	//// Получение БД
-	//mongoDB := mongoClient.Mongodb.Database(cfg.Mongo.DatabaseName())
-	//
-	//partRepository := mongodb.NewPartStorage(mongoDB)
-	//partService := partServ.NewService(partRepository)
-	//
-	//err = partService.InitParts(context.Background(), defaultPartsNum)
-	//if err != nil {
-	//	log.Printf("Error initializing parts: %s", err)
-	//	return
-	//}
-	//
-	//inventoryHandler := v1.NewInventoryHandler(partService)
-	//
-	//srv := grpc.NewServer()
-	//
-	//inventoryv1.RegisterInventoryServiceServer(srv, inventoryHandler)
-	//
-	//reflection.Register(srv)
-	//
-	//// Регистрация эндпоинтов для healthcheck
-	//health.RegisterServer(srv)
-	//
-	//// Канал для уведомления об ошибках
-	//notify := make(chan error, 1)
-	//
-	//go func() {
-	//	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.Grpc.Port()))
-	//	if err != nil {
-	//		log.Printf("failed to listen: %v", err)
-	//
-	//		notify <- err
-	//		close(notify)
-	//		return
-	//	}
-	//
-	//	log.Printf("starting gRPC server on port %s", cfg.Grpc.Port())
-	//
-	//	if err = srv.Serve(lis); err != nil {
-	//		log.Printf("failed to serve: %v", err)
-	//
-	//		notify <- err
-	//	}
-	//
-	//	close(notify)
-	//}()
-	//
-	//interrupt := make(chan os.Signal, 1)
-	//signalGo.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
-	//
-	//select {
-	//case sig := <-interrupt:
-	//	log.Printf("Received interrupting signal: %v", sig)
-	//case errNotify := <-notify:
-	//	log.Printf("Received notify error: %v", errNotify)
-	//}
-	//
-	//log.Println("Shutting down gRPC server...")
-	//
-	//srv.GracefulStop()
+	app.Run(cfg)
 }
