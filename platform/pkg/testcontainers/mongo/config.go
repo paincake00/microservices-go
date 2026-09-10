@@ -3,9 +3,9 @@ package mongo
 import (
 	"context"
 
-	"github.com/moby/moby/api/types/container"
-	"github.com/paincake00/microservices-go/platform/pkg/logger"
 	"go.uber.org/zap"
+
+	"github.com/paincake00/microservices-go/platform/pkg/logger"
 )
 
 type Logger interface {
@@ -44,10 +44,4 @@ func buildConfig(opts ...Option) *Config {
 	}
 
 	return cfg
-}
-
-func defaultHostConfig() func(hc *container.HostConfig) {
-	return func(hc *container.HostConfig) {
-		hc.AutoRemove = true
-	}
 }

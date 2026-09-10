@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/paincake00/microservices-go/inventory/internal/repository"
 	"github.com/paincake00/microservices-go/inventory/pkg/mongoclient"
 	"github.com/paincake00/microservices-go/platform/pkg/logger"
 	"github.com/paincake00/microservices-go/platform/pkg/testcontainers/mongo"
-	"github.com/stretchr/testify/suite"
 )
 
 const (
@@ -71,7 +72,6 @@ func (s *RepoSuite) SetupSuite() {
 }
 
 func (s *RepoSuite) TearDownSuite() {
-
 	err := s.container.Terminate(context.Background())
 	s.Require().NoError(err)
 	logger.Info(context.Background(), "🛑 Контейнер MongoDB остановлен")

@@ -15,7 +15,8 @@ const (
 	mongoStartupTimeout = 1 * time.Minute
 
 	mongoEnvUsernameKey = "MONGO_INITDB_ROOT_USERNAME"
-	mongoEnvPasswordKey = "MONGO_INITDB_ROOT_PASSWORD"
+	//nolint:gosec
+	mongoEnvPassKey = "MONGO_INITDB_ROOT_PASSWORD"
 )
 
 type Container struct {
@@ -76,7 +77,7 @@ func initContainer(ctx context.Context, cfg *Config) (testcontainers.Container, 
 		Networks: []string{cfg.NetworkName},
 		Env: map[string]string{
 			mongoEnvUsernameKey: cfg.Username,
-			mongoEnvPasswordKey: cfg.Password,
+			mongoEnvPassKey:     cfg.Password,
 		},
 		WaitingFor: wait.ForAll(
 			wait.ForListeningPort(mongoPort+"/tcp"),
@@ -91,7 +92,7 @@ func initContainer(ctx context.Context, cfg *Config) (testcontainers.Container, 
 				},
 			),
 		).WithDeadline(mongoStartupTimeout),
-		//HostConfigModifier: defaultHostConfig(),
+		// HostConfigModifier: defaultHostConfig(),
 	}
 
 	container, err := testcontainers.GenericContainer(

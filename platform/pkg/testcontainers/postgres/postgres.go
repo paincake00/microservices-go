@@ -15,6 +15,7 @@ const (
 	postgresStartupTimeout = 1 * time.Minute
 
 	postgresEnvUsernameKey = "POSTGRES_USER"
+	//nolint:gosec
 	postgresEnvPasswordKey = "POSTGRES_PASSWORD"
 	postgresEnvDBKey       = "POSTGRES_DB"
 )
@@ -91,7 +92,7 @@ func initContainer(ctx context.Context, cfg *Config) (testcontainers.Container, 
 				},
 			),
 		).WithDeadline(postgresStartupTimeout),
-		//HostConfigModifier: defaultHostConfig(),
+		// HostConfigModifier: defaultHostConfig(),
 	}
 
 	container, err := testcontainers.GenericContainer(
