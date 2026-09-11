@@ -92,6 +92,7 @@ func setupTestEnvironment(ctx context.Context) *TestEnvironment {
 		testcontainers.AppConfigPathKey: envFilePathInContainer,
 		// Переопределяем хост MongoDB для подключения к контейнеру из testcontainers
 		testcontainers.MongoHostKey: generatedMongo.Config().ContainerName,
+		testcontainers.MongoPortKey: generatedMongo.Port(),
 	}
 
 	// binds для файловой системы или volumes

@@ -36,6 +36,6 @@ func (s *ServiceSuite) SetupSuite() {
 
 func (s *ServiceSuite) TearDownSuite() {}
 
-func TestOrderRepoIntegration(t *testing.T) {
+func TestOrderServiceIntegration(t *testing.T) {
 	suite.Run(t, new(ServiceSuite))
 }
