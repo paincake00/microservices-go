@@ -12,24 +12,23 @@ import (
 	"github.com/paincake00/microservices-go/platform/pkg/logger"
 	"github.com/paincake00/microservices-go/platform/pkg/testcontainers"
 	"github.com/paincake00/microservices-go/platform/pkg/testcontainers/app"
-	"github.com/paincake00/microservices-go/platform/pkg/testcontainers/mongo"
 	"github.com/paincake00/microservices-go/platform/pkg/testcontainers/network"
 	"github.com/paincake00/microservices-go/platform/pkg/testcontainers/path"
+	"github.com/paincake00/microservices-go/platform/pkg/testcontainers/postgres"
 )
 
 const (
 	// Данные для сети
-	projectName = "e2e-inventory"
+	projectName = "e2e-order"
 
 	// Параметры для контейнеров
-	mongoContainer         = "e2e-mongo"
-	mongoPort              = "27017"
-	appName                = "inventory-app"
-	dockerfile             = "deploy/docker/inventory/Dockerfile"
+	postgresContainer      = "e2e-postgres"
+	appName                = "order-app"
+	dockerfile             = "deploy/docker/order/Dockerfile"
 	envFilePathInContainer = "/app/config/.env"
 
 	// Переменные окружения приложения
-	grpcPortKey = "GRPC_PORT"
+	httpPortKey = "HTTP_SERVER_PORT"
 
 	// Значения переменных окружения
 	loggerLevelValue = "debug"
@@ -37,18 +36,17 @@ const (
 )
 
 var (
-	envFilePath         = filepath.Join("..", "..", "..", "deploy", "compose", "inventory", ".env")
-	envFilePathFromRoot = filepath.Join("deploy", "compose", "inventory", ".env")
+	envFilePath         = filepath.Join("..", "..", "..", "deploy", "compose", "order", ".env")
+	envFilePathFromRoot = filepath.Join("deploy", "compose", "order", ".env")
 )
 
 // TestEnvironment — структура для хранения ресурсов тестового окружения
 type TestEnvironment struct {
-	Network *network.Network
-	Mongo   *mongo.Container
-	App     *app.Container
+	Network  *network.Network
+	Postgres *postgres.Container
+	App      *app.Container
 }
 
-// setupTestEnvironment — подготавливает тестовое окружение: сеть, контейнеры и возвращает структуру с ресурсами
 func setupTestEnvironment(ctx context.Context) *TestEnvironment {
 	logger.Info(ctx, "🚀 Подготовка тестового окружения...")
 
@@ -59,43 +57,37 @@ func setupTestEnvironment(ctx context.Context) *TestEnvironment {
 	logger.Info(ctx, "✅ Сеть успешно создана")
 
 	// Получаем переменные окружения для MongoDB с проверкой на наличие
-	mongoUsername := getEnvWithLogging(ctx, testcontainers.MongoUsernameKey)
-	mongoPassword := getEnvWithLogging(ctx, testcontainers.MongoPasswordKey)
-	mongoImageName := getEnvWithLogging(ctx, testcontainers.MongoImageNameKey)
-	mongoDatabase := getEnvWithLogging(ctx, testcontainers.MongoDatabaseKey)
-	mongoAuthDB := getEnvWithLogging(ctx, testcontainers.MongoAuthDBKey)
+	postgresUsername := getEnvWithLogging(ctx, testcontainers.PostgresUsernameKey)
+	postgresPassword := getEnvWithLogging(ctx, testcontainers.PostgresPasswordKey)
+	postgresImageName := getEnvWithLogging(ctx, testcontainers.PostgresImageNameKey)
+	postgresDatabase := getEnvWithLogging(ctx, testcontainers.PostgresDatabaseKey)
 
-	generatedMongo, err := mongo.NewContainer(
+	generatedPostgres, err := postgres.NewContainer(
 		ctx,
-		mongo.WithNetworkName(generatedNetwork.Name()),
-		mongo.WithContainerName(mongoContainer),
-		mongo.WithImageName(mongoImageName),
-		mongo.WithDatabase(mongoDatabase),
-		mongo.WithUsername(mongoUsername),
-		mongo.WithPassword(mongoPassword),
-		mongo.WithAuthDB(mongoAuthDB),
-		mongo.WithLogger(logger.Logger()),
+		postgres.WithNetworkName(generatedNetwork.Name()),
+		postgres.WithContainerName(postgresContainer),
+		postgres.WithImageName(postgresImageName),
+		postgres.WithDatabase(postgresDatabase),
+		postgres.WithUsername(postgresUsername),
+		postgres.WithPassword(postgresPassword),
+		postgres.WithLogger(logger.Logger()),
 	)
 	if err != nil {
 		clearTestEnvironment(ctx, &TestEnvironment{Network: generatedNetwork})
-		logger.Fatal(ctx, "не удалось запустить контейнер MongoDB", zap.Error(err))
+		logger.Fatal(ctx, "не удалось запустить контейнер Postgres", zap.Error(err))
 	}
-	logger.Info(ctx, "✅ Контейнер MongoDB успешно запущен")
+	logger.Info(ctx, "✅ Контейнер Postgres успешно запущен")
 
-	// Получаем порт gRPC для waitStrategy
-	grpcPort := getEnvWithLogging(ctx, grpcPortKey)
+	httpPort := getEnvWithLogging(ctx, httpPortKey)
 
-	// Поиск корня проекта
 	projectRoot := path.GetProjectRoot()
 	logger.Info(ctx, "найден корень проекта", zap.String("projectRoot", projectRoot))
 
 	appEnv := map[string]string{
 		testcontainers.AppConfigPathKey: envFilePathInContainer,
 		// Переопределяем хост MongoDB для подключения к контейнеру из testcontainers
-		testcontainers.MongoHostKey: generatedMongo.Config().ContainerName,
-		testcontainers.MongoPortKey: mongoPort,
+		testcontainers.PostgresHostKey: generatedPostgres.Config().ContainerName,
 	}
-
 	// binds для файловой системы или volumes
 	binds := []app.Mount{
 		{
@@ -106,23 +98,23 @@ func setupTestEnvironment(ctx context.Context) *TestEnvironment {
 	}
 
 	// Создаем настраиваемую стратегию ожидания с увеличенным таймаутом
-	waitStrategy := wait.ForListeningPort(grpcPort + "/tcp").
+	waitStrategy := wait.ForListeningPort(httpPort + "/tcp").
 		WithStartupTimeout(startupTimeout)
 
-	generatedApp, err := app.NewContainer(
+	generatedOrder, err := app.NewContainer(
 		ctx,
 		app.WithName(appName),
-		app.WithPort(grpcPort),
-		app.WithDockerfile(projectRoot, dockerfile),
+		app.WithPort(httpPort),
 		app.WithNetwork(generatedNetwork.Name()),
+		app.WithDockerfile(projectRoot, dockerfile),
 		app.WithEnv(appEnv),
 		app.WithBinds(binds),
-		app.WithLogOutput(os.Stdout),
+		// app.WithLogOutput(os.Stdout),
 		app.WithStartupWait(waitStrategy),
 		app.WithLogger(logger.Logger()),
 	)
 	if err != nil {
-		clearTestEnvironment(ctx, &TestEnvironment{Network: generatedNetwork, Mongo: generatedMongo})
+		clearTestEnvironment(ctx, &TestEnvironment{Network: generatedNetwork, Postgres: generatedPostgres})
 		logger.Fatal(ctx, "не удалось запустить контейнер приложения", zap.Error(err))
 	}
 	logger.Info(ctx, "✅ Контейнер приложения успешно запущен")
@@ -130,9 +122,9 @@ func setupTestEnvironment(ctx context.Context) *TestEnvironment {
 	logger.Info(ctx, "🎉 Тестовое окружение готово")
 
 	return &TestEnvironment{
-		Network: generatedNetwork,
-		Mongo:   generatedMongo,
-		App:     generatedApp,
+		Network:  generatedNetwork,
+		Postgres: generatedPostgres,
+		App:      generatedOrder,
 	}
 }
 
