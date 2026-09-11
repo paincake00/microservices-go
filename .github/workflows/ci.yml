@@ -45,10 +45,17 @@ jobs:
       modules: ${{ needs.extract-vars.outputs.modules }}
       go-version: ${{ needs.extract-vars.outputs.go-version }}
 
+  e2e-test:
+    uses: ./.github/workflows/test-e2e-reusable.yml
+    needs: integration-test
+    with:
+      modules: ${{ needs.extract-vars.outputs.modules }}
+      go-version: ${{ needs.extract-vars.outputs.go-version }}
+
   coverage:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/test-coverage-reusable.yml
-    needs: test
+    needs: e2e-test
     with:
       modules: ${{ needs.extract-vars.outputs.modules }}
       go-version: ${{ needs.extract-vars.outputs.go-version }}

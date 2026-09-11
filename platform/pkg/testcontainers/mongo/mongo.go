@@ -60,6 +60,10 @@ func (c *Container) Port() string {
 	return c.cfg.Port
 }
 
+func (c *Container) Config() *Config {
+	return c.cfg
+}
+
 func (c *Container) Terminate(ctx context.Context) error {
 	if err := c.container.Terminate(ctx); err != nil {
 		c.cfg.Logger.Error(ctx, "failed to terminate mongo container", zap.Error(err))
@@ -92,7 +96,6 @@ func initContainer(ctx context.Context, cfg *Config) (testcontainers.Container, 
 				},
 			),
 		).WithDeadline(mongoStartupTimeout),
-		// HostConfigModifier: defaultHostConfig(),
 	}
 
 	container, err := testcontainers.GenericContainer(

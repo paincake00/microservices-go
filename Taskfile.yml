@@ -812,3 +812,30 @@ tasks:
           fi
         done
         exit $ERR
+        
+  test-e2e:
+    desc: "Запускает e2e-тесты по модулям"
+    summary: |
+      Запускает e2e-тесты для модулей, указанных через переменую MODULES.
+      Использует тег "e2e" для идентификации тестов.
+    cmds:
+      - |
+        ERR=0
+        echo "🚀 Запуск e2e тестов (по тегу e2e) для модулей: {{.MODULES}}"
+        for mod in {{.MODULES}}; do
+          if [ -d "$mod" ]; then
+            echo "🧪 Проверка модуля $mod на наличие e2e тестов"
+
+            # Проверяем наличие файлов с тегом e2e
+            HAS_TESTS=$(grep -r "//go:build e2e" $mod --include="*.go" | wc -l)
+
+            if [ "$HAS_TESTS" -eq 0 ]; then
+              echo "⚠️ Модуль $mod не содержит e2e тестов (с тегом e2e), пропускаем"
+              continue
+            fi
+
+            echo "▶️ Запуск e2e тестов для $mod"
+            go test -v -tags=e2e ./$mod/... || ERR=1
+          fi
+        done
+        exit $ERR

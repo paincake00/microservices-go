@@ -53,6 +53,7 @@ func (s *RepoSuite) SetupSuite() {
 		mongo.WithAuthDB(mongoAuthDB),
 		mongo.WithLogger(logger.Logger()),
 	)
+	s.Require().NoError(err)
 
 	s.container = container
 

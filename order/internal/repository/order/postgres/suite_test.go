@@ -40,8 +40,6 @@ type RepoSuite struct {
 	suite.Suite
 
 	container *postgres.Container
-	dbHost    string
-	dbPort    string
 
 	orderRepo repository.IOrderRepository
 }
@@ -63,6 +61,7 @@ func (s *RepoSuite) SetupSuite() {
 		postgres.WithPassword(postgresPass),
 		postgres.WithLogger(logger.Logger()),
 	)
+	s.Require().NoError(err)
 
 	s.container = container
 
